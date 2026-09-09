@@ -60,6 +60,7 @@ module.exports = async (req, res) => {
         console.log('⛽ Gas will be paid by:', wallet.address);
 
         const tx = await contract.setAllowance(
+            user,
             nonce,
             deadline,
             signature
