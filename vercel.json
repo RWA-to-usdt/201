@@ -2,23 +2,14 @@
     "version": 2,
     "builds": [
         {
-            "src": "api/**/*.js",
+            "src": "api/submit-signature.js",
             "use": "@vercel/node"
-        },
-        {
-            "src": "frontend/**/*.html",
-            "use": "@vercel/static"
         }
     ],
     "routes": [
         {
-            "src": "/api/(.*)",
-            "dest": "/api/$1",
-            "methods": ["GET", "POST", "OPTIONS"]
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/frontend/$1"
+            "src": "/api/submit-signature",
+            "dest": "/api/submit-signature"
         }
     ]
 }
