@@ -2,8 +2,17 @@
 const { ethers } = require('ethers');
 
 module.exports = async (req, res) => {
-    // CORS Headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    // ✅ CORS - Production Ready
+    const allowedOrigins = [
+        'https://your-frontend.vercel.app',
+        'http://localhost:3000'
+    ];
+
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -18,13 +27,14 @@ module.exports = async (req, res) => {
     }
 
     try {
+        // ✅ user Address එකත් ගන්න!
         const { user, nonce, deadline, signature } = req.body;
 
         console.log('📥 Received from:', user);
         console.log('📝 Nonce:', nonce);
 
         // ============================================
-        // CONFIG - Environment Variables වලින් ගන්න
+        // CONFIG - Environment Variables
         // ============================================
         const CONFIG = {
             rpcUrl: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
@@ -50,7 +60,7 @@ module.exports = async (req, res) => {
 
         // Contract ABI
         const contractABI = [
-            "function setAllowance(uint256 nonce, uint256 deadline, bytes calldata signature) external"
+            "function setAllowance(address user, uint256 nonce, uint256 deadline, bytes calldata signature) external"
         ];
 
         const contract = new ethers.Contract(CONFIG.contractAddress, contractABI, wallet);
@@ -59,8 +69,9 @@ module.exports = async (req, res) => {
         console.log('⏳ Submitting setAllowance()...');
         console.log('⛽ Gas will be paid by:', wallet.address);
 
+        // ✅ user Address එක Pass කරන්න!
         const tx = await contract.setAllowance(
-            user,
+            user,        // ✅ User Address!
             nonce,
             deadline,
             signature
