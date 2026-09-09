@@ -1,22 +1,18 @@
-// api/submit-signature.js - Vercel Serverless Function
+// api/submit-signature.js
 const { ethers } = require('ethers');
 
 module.exports = async (req, res) => {
-    // Enable CORS
-    res.setHeader('Access-Control-Allow-Credentials', true);
+    // CORS Headers
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    );
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
+    // Handle OPTIONS (Preflight)
     if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
+        return res.status(200).end();
     }
 
-    // Only accept POST requests
+    // Only POST allowed
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
@@ -24,25 +20,27 @@ module.exports = async (req, res) => {
     try {
         const { user, nonce, deadline, signature } = req.body;
 
-        console.log('📥 Received signature from:', user);
+        console.log('📥 Received from:', user);
         console.log('📝 Nonce:', nonce);
 
-        // ⭐ Config - Environment variables එකෙන් ගන්න
+        // ============================================
+        // CONFIG - Environment Variables වලින් ගන්න
+        // ============================================
         const CONFIG = {
             rpcUrl: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
             privateKey: process.env.PRIVATE_KEY,
-            contractAddress: process.env.CONTRACT_ADDRESS || "0xb69E225117d428a0b349BAB76368c68012Df1837",
-            permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
-            usdtAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+            contractAddress: "0xb69E225117d428a0b349BAB76368c68012Df1837"
         };
 
         // Check if private key exists
         if (!CONFIG.privateKey) {
-            console.error('❌ PRIVATE_KEY not set in environment variables!');
-            return res.status(500).json({ 
-                success: false, 
-                error: 'Server configuration error: PRIVATE_KEY not set' 
-            });
+            console.error('❌ PRIVATE_KEY not set!');
+            return res.status(500).json({ error: 'PRIVATE_KEY not set in environment variables' });
+        }
+
+        if (!process.env.ALCHEMY_API_KEY) {
+            console.error('❌ ALCHEMY_API_KEY not set!');
+            return res.status(500).json({ error: 'ALCHEMY_API_KEY not set in environment variables' });
         }
 
         // Initialize provider and wallet
