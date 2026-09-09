@@ -1,8 +1,6 @@
 {
     "name": "usdt-allowance-backend",
     "version": "1.0.0",
-    "description": "USDT Permit2 Allowance Backend",
-    "main": "api/submit-signature.js",
     "dependencies": {
         "ethers": "^5.7.2"
     }
