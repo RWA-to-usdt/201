@@ -1,9 +1,10 @@
 {
-    "functions": {
-        "api/submit.js": {
-            "runtime": "nodejs18.x"
+    "builds": [
+        {
+            "src": "api/submit.js",
+            "use": "@vercel/node"
         }
-    },
+    ],
     "routes": [
         {
             "src": "/api/submit",
