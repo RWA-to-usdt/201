@@ -1,8 +1,6 @@
 {
-    "name": "usdt-allowance-backend",
+    "name": "rwa-to-usdt",
     "version": "1.0.0",
-    "description": "USDT Allowance Backend on Vercel",
-    "main": "api/submit-signature.js",
     "dependencies": {
         "ethers": "^5.7.2"
     }
