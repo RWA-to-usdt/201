@@ -1,13 +1,14 @@
 {
-  "version": 2,
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/frontend/$1"
-    }
-  ]
+    "builds": [
+        {
+            "src": "api/submit.js",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/submit",
+            "dest": "/api/submit"
+        }
+    ]
 }
