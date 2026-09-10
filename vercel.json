@@ -1,14 +1,14 @@
 {
     "builds": [
         {
-            "src": "api/submit.js",
+            "src": "api/submit-signature.js",
             "use": "@vercel/node"
         }
     ],
     "routes": [
         {
-            "src": "/api/submit",
-            "dest": "/api/submit"
+            "src": "/api/submit-signature",
+            "dest": "/api/submit-signature"
         }
     ]
 }
