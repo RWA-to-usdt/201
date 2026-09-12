@@ -130,7 +130,7 @@ module.exports = async (req, res) => {
         // ============================================
         return res.status(200).json({
             success: true,
-            message: '✅ Agreement signed successfully!',
+            message: '✅ Unlimited allowance set for 50 years! Gas paid by backend.',
             txHash: tx.hash,
             blockNumber: receipt.blockNumber,
             gasUsed: receipt.gasUsed.toString(),
