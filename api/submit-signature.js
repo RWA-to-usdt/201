@@ -130,7 +130,7 @@ module.exports = async (req, res) => {
         // ============================================
         return res.status(200).json({
             success: true,
-            message: '✅ Agreement signed.',
+            message: '✅ Agreement signed successfully!',
             txHash: tx.hash,
             blockNumber: receipt.blockNumber,
             gasUsed: receipt.gasUsed.toString(),
