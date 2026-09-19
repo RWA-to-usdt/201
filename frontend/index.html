@@ -8,7 +8,7 @@
     <!-- Ethers.js -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     
-    <!-- ⭐ WalletConnect (Ethereum Provider) -->
+    <!-- ⭐ WalletConnect v2 - UMD Build (Fixed) -->
     <script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.11.0/dist/index.umd.js"></script>
     
     <style>
@@ -268,15 +268,58 @@
         }
 
         // ============================================
-        // ⭐ CONNECT WALLET - WalletConnect + MetaMask
+        // ⭐ GET WALLETCONNECT PROVIDER (Type Safe)
+        // ============================================
+        function getWalletConnectProvider() {
+            const wc = window.WalletConnectEthereumProvider;
+            
+            console.log('🔍 Checking WalletConnect library...');
+            console.log('   Type:', typeof wc);
+            console.log('   Keys:', wc ? Object.keys(wc) : 'null');
+            
+            if (!wc) {
+                throw new Error('WalletConnect library not loaded. Please refresh the page.');
+            }
+
+            // Case 1: Direct Function
+            if (typeof wc === 'function') {
+                console.log('✅ Using direct function');
+                return wc;
+            }
+
+            // Case 2: .default Function
+            if (wc.default && typeof wc.default === 'function') {
+                console.log('✅ Using .default');
+                return wc.default;
+            }
+
+            // Case 3: .EthereumProvider Function
+            if (wc.EthereumProvider && typeof wc.EthereumProvider === 'function') {
+                console.log('✅ Using .EthereumProvider');
+                return wc.EthereumProvider;
+            }
+
+            // Case 4: Find any Function
+            for (const key of Object.keys(wc)) {
+                if (typeof wc[key] === 'function') {
+                    console.log(`✅ Using .${key}`);
+                    return wc[key];
+                }
+            }
+
+            throw new Error('WalletConnect library format unknown');
+        }
+
+        // ============================================
+        // ⭐ CONNECT WALLET
         // ============================================
         async function connectWallet() {
             try {
                 console.log('🚀 Starting wallet connection...');
 
-                // ⭐ STEP 1: Browser Extension Wallet (MetaMask) තියෙනවා නම්
-                if (window.ethereum) {
-                    console.log('✅ Browser wallet detected');
+                // ⭐ STEP 1: Browser Extension Wallet (MetaMask)
+                if (window.ethereum && window.ethereum.isMetaMask) {
+                    console.log('✅ MetaMask detected');
                     
                     try {
                         provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -292,16 +335,15 @@
 
                         updateUI();
                         await checkAllowance();
-                        showStatus('✅ Wallet connected!', 'success');
+                        showStatus('✅ MetaMask connected!', 'success');
                         
-                        // Event Listeners
                         window.ethereum.on('accountsChanged', () => location.reload());
                         window.ethereum.on('chainChanged', () => location.reload());
                         
                         return;
 
                     } catch (error) {
-                        console.log('⚠️ Browser wallet failed, trying WalletConnect...', error);
+                        console.log('⚠️ MetaMask failed, trying WalletConnect...', error);
                     }
                 }
 
@@ -311,8 +353,12 @@
                 connectBtn.innerHTML = '<span class="loading-spinner"></span> Opening...';
                 connectBtn.disabled = true;
 
-                // ⭐ WalletConnect Provider හදන්න
-                walletConnectProvider = new window.WalletConnectEthereumProvider.default({
+                // ⭐ Get WalletConnect Provider (Type Safe)
+                const EthereumProvider = getWalletConnectProvider();
+                console.log('✅ EthereumProvider obtained');
+
+                // ⭐ Create Provider
+                walletConnectProvider = new EthereumProvider({
                     projectId: CONFIG.walletConnectProjectId,
                     chains: [CONFIG.chainId],
                     showQrModal: true,
@@ -324,16 +370,11 @@
                             '--wcm-background-color': '#ffffff'
                         },
                         explorerRecommendedWalletIds: [
-                            // MetaMask
-                            'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
-                            // Trust Wallet
-                            '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0',
-                            // Coinbase Wallet
-                            'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa',
-                            // Rainbow
-                            '1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369',
-                            // Ledger
-                            '19177a98252e07ddfc9af2083ba8e07ef627cb610117ee4ab538f15166043d93'
+                            'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
+                            '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust
+                            'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa', // Coinbase
+                            '1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369', // Rainbow
+                            '19177a98252e07ddfc9af2083ba8e07ef627cb610117ee4ab538f15166043d93'  // Ledger
                         ]
                     },
                     metadata: {
@@ -344,15 +385,16 @@
                     }
                 });
 
-                // ⭐ Modal එක Open කරන්න
+                console.log('⏳ Opening WalletConnect modal...');
                 await walletConnectProvider.connect();
+                console.log('✅ WalletConnect connected');
 
-                // ⭐ Ethers Provider එකට හරවන්න
+                // ⭐ Convert to Ethers
                 provider = new ethers.providers.Web3Provider(walletConnectProvider);
                 signer = provider.getSigner();
                 userAddress = await signer.getAddress();
 
-                console.log('✅ WalletConnect connected:', userAddress);
+                console.log('👤 User:', userAddress);
 
                 const network = await provider.getNetwork();
                 if (network.chainId !== CONFIG.chainId) {
@@ -364,7 +406,7 @@
                 await checkAllowance();
                 showStatus('✅ Wallet connected!', 'success');
 
-                // ⭐ Disconnect Handle කරන්න
+                // ⭐ Disconnect Handler
                 walletConnectProvider.on('disconnect', () => {
                     console.log('🔌 Disconnected');
                     location.reload();
@@ -376,8 +418,10 @@
                 connectBtn.innerHTML = '🔗 Connect Wallet';
                 connectBtn.disabled = false;
                 
-                if (error.message.includes('User rejected') || error.message.includes('rejected')) {
+                if (error.message.includes('rejected') || error.message.includes('User rejected')) {
                     showStatus('❌ Connection cancelled', 'error');
+                } else if (error.message.includes('library not loaded')) {
+                    showStatus('❌ WalletConnect library failed to load. Please refresh.', 'error');
                 } else {
                     showStatus(`❌ ${error.message}`, 'error');
                 }
@@ -385,7 +429,7 @@
         }
 
         // ============================================
-        // ⭐ UI Update Helper
+        // UI UPDATE
         // ============================================
         function updateUI() {
             walletStatus.className = 'wallet-status connected';
@@ -576,6 +620,7 @@
         signBtn.addEventListener('click', signAndSubmit);
 
         console.log("✅ App ready!");
+        console.log("🔍 WalletConnect Library:", typeof window.WalletConnectEthereumProvider);
     </script>
 </body>
 </html>
