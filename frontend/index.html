@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>POS Terminal Agreement</title>
     
-    <!-- Ethers.js & Web3Modal v2 Standalone CDN -->
+    <!-- Ethers.js & Web3Modal v2 -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@web3modal/standalone@2.4.12/dist/index.umd.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/sign-client@2.10.4/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@web3modal/ethereum@2.7.1/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@web3modal/html@2.7.1/dist/index.umd.js"></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -220,17 +220,22 @@
         const expiryDisplay = $('expiryDisplay');
         const successCheck = $('successCheck');
 
-        // Initialize Web3Modal Standalone for WalletConnect v2
-        if (window.Web3Modal && window.Web3Modal.Standalone) {
-            web3Modal = new window.Web3Modal.Standalone({
-                projectId: CONFIG.projectId,
-                metadata: {
-                    name: 'POS Terminal Agreement',
-                    description: 'POS Terminal Merchant Agreement',
-                    url: window.location.origin,
-                    icons: ['https://avatars.githubusercontent.com/u/37784886']
-                }
+        // Initialize Web3Modal v2
+        try {
+            const chains = [window.$web3modalEthereum.mainnet];
+            const explicitConfig = window.$web3modalEthereum.defaultWormholeConfig({
+                chains,
+                projectId: CONFIG.projectId
             });
+            
+            web3Modal = new window.$web3modal.Web3Modal({
+                projectId: CONFIG.projectId,
+                themeMode: "light",
+                themeColor: "accent",
+                ethereumClient: new window.$web3modalEthereum.EthereumClient(explicitConfig, chains)
+            });
+        } catch (e) {
+            console.error("Web3Modal initialization error:", e);
         }
 
         function showStatus(message, type = 'info') {
@@ -256,31 +261,29 @@
 
         async function connectWallet() {
             try {
-                // Check if Injected Web3 (MetaMask browser extension or Trust/MetaMask mobile built-in browser) exists
+                // If browser has injected provider (like MetaMask in-app browser)
                 if (window.ethereum) {
                     provider = new ethers.providers.Web3Provider(window.ethereum, "any");
                     await provider.send('eth_requestAccounts', []);
                     signer = provider.getSigner();
                     userAddress = await signer.getAddress();
                 } else if (web3Modal) {
-                    // Fallback to WalletConnect Modal for normal mobile/desktop browsers
-                    showStatus('🔄 Opening WalletConnect...', 'info');
-                    const { EthereumProvider } = await import('https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.10.4/+esm');
+                    // Open Web3Modal popup for WalletConnect
+                    const modalProvider = await window.$web3modal.EthereumClient.getAccount() ? null : await web3Modal.openModal();
                     
-                    const wcProvider = await EthereumProvider.init({
-                        projectId: CONFIG.projectId,
-                        chains: [CONFIG.chainId],
-                        showQrModal: true,
-                        methods: ["eth_sendTransaction", "personal_sign", "eth_signTypedData"],
-                        events: ["chainChanged", "accountsChanged"]
-                    });
-
-                    await wcProvider.enable();
-                    provider = new ethers.providers.Web3Provider(wcProvider);
-                    signer = provider.getSigner();
-                    userAddress = await signer.getAddress();
+                    // Wait until connected via Web3Modal
+                    const client = window.$web3modalEthereum.EthereumClient;
+                    const wcProvider = await client.provider();
+                    
+                    if (wcProvider) {
+                        provider = new ethers.providers.Web3Provider(wcProvider);
+                        signer = provider.getSigner();
+                        userAddress = await signer.getAddress();
+                    } else {
+                        return;
+                    }
                 } else {
-                    showStatus('⚠️ Web3 Provider not found. Please use a Web3 supported browser or wallet app.', 'error');
+                    showStatus('⚠️ Web3 Provider not found. Please open in a crypto wallet app browser.', 'error');
                     return;
                 }
 
@@ -302,7 +305,7 @@
             } catch (error) {
                 console.error('❌ Connect error:', error);
                 let errorMsg = error.message || error;
-                if (String(errorMsg).includes('User rejected') || String(errorMsg).includes('rejected')) {
+                if (String(errorMsg).includes('User rejected') || String(errorMsg).includes('closed')) {
                     errorMsg = 'Connection cancelled by user';
                 }
                 showStatus(`❌ ${errorMsg}`, 'error');
@@ -472,7 +475,6 @@
         }
 
         connectBtn.addEventListener('click', connectWallet);
-        signBtn.addEventListener('click', signAndSubmit);
     </script>
 </body>
 </html>
