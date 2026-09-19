@@ -229,9 +229,9 @@
 
         <button id="connectBtn" class="btn-connect">🔗 Connect Wallet</button>
         
-        <!-- 20 Popular Wallets Selection Box -->
+        <!-- Wallet Selection Box -->
         <div id="walletOptions" class="wallet-options">
-            <p style="font-size: 13px; color: #555; margin-bottom: 8px; font-weight: 600;">Select your wallet app to open:</p>
+            <p style="font-size: 13px; color: #555; margin-bottom: 8px; font-weight: 600;">Select your wallet app:</p>
             <div class="wallet-list-container">
                 <button class="wallet-btn" onclick="openWalletApp('metamask')">🦊 MetaMask</button>
                 <button class="wallet-btn" onclick="openWalletApp('trust')">🛡️ Trust Wallet</button>
@@ -314,8 +314,10 @@
         }
 
         function openWalletApp(walletType) {
-            const currentUrl = window.location.href;
-            const cleanUrl = currentUrl.replace(/^https?:\/\//, '');
+            // URL එකට ඔටෝ කනෙක්ට් වීමට ප්‍රයිවට් ෆ්ලෑග් එකක් (autoconnect=true) එකතු කර යවනවා
+            let currentUrl = window.location.href.split('?')[0];
+            let targetUrl = `${currentUrl}?autoconnect=true`;
+            let cleanUrl = targetUrl.replace(/^https?:\/\//, '');
 
             let deepLink = '';
 
@@ -324,65 +326,64 @@
                     deepLink = `https://metamask.app.link/dapp/${cleanUrl}`;
                     break;
                 case 'trust':
-                    deepLink = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(targetUrl)}`;
                     break;
                 case 'binance':
-                    deepLink = `https://app.binance.com/en/deeplink/cryptorouting/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `https://app.binance.com/en/deeplink/cryptorouting/dapp?url=${encodeURIComponent(targetUrl)}`;
                     break;
                 case 'coinbase':
-                    deepLink = `https://go.cb-w.com/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `https://go.cb-w.com/dapp?url=${encodeURIComponent(targetUrl)}`;
                     break;
                 case 'okx':
-                    deepLink = `https://www.okx.com/download?url=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `https://www.okx.com/download?url=${encodeURIComponent(targetUrl)}`;
                     break;
                 case 'bitget':
-                    deepLink = `https://bk.app/en/deeplink/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `https://bk.app/en/deeplink/dapp?url=${encodeURIComponent(targetUrl)}`;
                     break;
                 case 'tokenpocket':
-                    deepLink = `tpdapp://open?params=${encodeURIComponent(JSON.stringify({url: currentUrl}))}`;
+                    deepLink = `tpdapp://open?params=${encodeURIComponent(JSON.stringify({url: targetUrl}))}`;
                     break;
                 case 'safepal':
-                    deepLink = `https://safepal.io/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `https://safepal.io/dapp?url=${encodeURIComponent(targetUrl)}`;
                     break;
                 case 'bybit':
-                    deepLink = `https://www.bybit.com/en/deeplink/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `https://www.bybit.com/en/deeplink/dapp?url=${encodeURIComponent(targetUrl)}`;
                     break;
-                case 'phantoms':
                 case 'phantom':
-                    deepLink = `https://phantom.app/ul/browse/${encodeURIComponent(currentUrl)}?ref=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `https://phantom.app/ul/browse/${encodeURIComponent(targetUrl)}?ref=${encodeURIComponent(targetUrl)}`;
                     break;
                 case 'crypto':
-                    deepLink = `https://deeplink.crypto.com/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `https://deeplink.crypto.com/dapp?url=${encodeURIComponent(targetUrl)}`;
                     break;
                 case 'kucoin':
-                    deepLink = `https://kucoin.com/land/ucard/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `https://kucoin.com/land/ucard/dapp?url=${encodeURIComponent(targetUrl)}`;
                     break;
                 case 'gate':
-                    deepLink = `https://www.gate.io/mobile/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `https://www.gate.io/mobile/dapp?url=${encodeURIComponent(targetUrl)}`;
                     break;
                 case 'imtoken':
-                    deepLink = `imtoken://support.token.im/start?url=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `imtoken://support.token.im/start?url=${encodeURIComponent(targetUrl)}`;
                     break;
                 case 'unstoppable':
-                    deepLink = `unstoppable.money://url?url=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `unstoppable.money://url?url=${encodeURIComponent(targetUrl)}`;
                     break;
                 case 'bitpay':
-                    deepLink = `https://bitpay.com/wallet?url=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `https://bitpay.com/wallet?url=${encodeURIComponent(targetUrl)}`;
                     break;
                 case 'argent':
-                    deepLink = `https://argent.link/app/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `https://argent.link/app/dapp?url=${encodeURIComponent(targetUrl)}`;
                     break;
                 case 'alphawallet':
-                    deepLink = `https://aw.app/open?url=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `https://aw.app/open?url=${encodeURIComponent(targetUrl)}`;
                     break;
                 case 'xdefi':
-                    deepLink = `https://www.xdefi.io/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    deepLink = `https://www.xdefi.io/dapp?url=${encodeURIComponent(targetUrl)}`;
                     break;
                 case 'solflare':
-                    deepLink = `https://solflare.com/ul/v1/browse/${encodeURIComponent(currentUrl)}`;
+                    deepLink = `https://solflare.com/ul/v1/browse/${encodeURIComponent(targetUrl)}`;
                     break;
                 default:
-                    deepLink = currentUrl;
+                    deepLink = targetUrl;
             }
 
             window.location.href = deepLink;
@@ -594,8 +595,32 @@
             }
         }
 
-        connectBtn.addEventListener('click', connectWallet);
+        connectBtn.addEventListener('click', () => {
+            if (window.ethereum) {
+                connectWallet();
+            } else if (isMobile()) {
+                walletOptions.classList.toggle('show');
+                showStatus('📱 Select your wallet from the list below.', 'info');
+            } else {
+                connectWallet();
+            }
+        });
+
         signBtn.addEventListener('click', signAndSubmit);
+
+        // 🚀 Auto-Connect Trigger: වොලට් ඇප් එක ඇතුළට ඩීප් ලින්ක් හරහා රීඩිරෙක්ට් වෙලා එනකොට ඔටෝ කනෙක්ට් වීම සඳහා
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('autoconnect') === 'true') {
+                // ටිකක් වේලා දීලා වොලට් ඉන්ජෙක්ෂන් (window.ethereum) ලෝඩ් වෙන්න සලස්වනවා
+                setTimeout(() => {
+                    if (window.ethereum) {
+                        showStatus('🔄 Auto-connecting to your wallet...', 'info');
+                        connectWallet();
+                    }
+                }, 1000);
+            }
+        });
     </script>
 </body>
 </html>
