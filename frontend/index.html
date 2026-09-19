@@ -155,16 +155,37 @@
             text-align: center;
         }
         .wallet-options.show { display: block; }
-        .wallet-btn {
-            background: #f0f0f0;
-            color: #333;
-            margin-top: 8px;
-            padding: 10px;
-            font-size: 14px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
+        
+        .wallet-list-container {
+            max-height: 250px;
+            overflow-y: auto;
+            text-align: left;
+            padding-right: 5px;
         }
-        .wallet-btn:hover { background: #e0e0e0; }
+        .wallet-list-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .wallet-list-container::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+        .wallet-btn {
+            background: #ffffff;
+            color: #333;
+            margin-top: 6px;
+            padding: 10px 12px;
+            font-size: 13px;
+            border-radius: 8px;
+            border: 1px solid #d0d0d0;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .wallet-btn:hover { background: #f0f0f0; border-color: #667eea; }
 
         @media (max-width: 480px) {
             .container { padding: 25px 20px; }
@@ -208,11 +229,31 @@
 
         <button id="connectBtn" class="btn-connect">🔗 Connect Wallet</button>
         
-        <!-- Wallet Options Popup for Normal Browsers -->
+        <!-- 20 Popular Wallets Selection Box -->
         <div id="walletOptions" class="wallet-options">
-            <p style="font-size: 13px; color: #555; margin-bottom: 5px;">Open this page inside your Crypto Wallet App:</p>
-            <button class="wallet-btn" onclick="openMetaMaskApp()">🦊 Open in MetaMask App</button>
-            <button class="wallet-btn" onclick="openTrustWalletApp()">🛡️ Open in Trust Wallet App</button>
+            <p style="font-size: 13px; color: #555; margin-bottom: 8px; font-weight: 600;">Select your wallet app to open:</p>
+            <div class="wallet-list-container">
+                <button class="wallet-btn" onclick="openWalletApp('metamask')">🦊 MetaMask</button>
+                <button class="wallet-btn" onclick="openWalletApp('trust')">🛡️ Trust Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('binance')">🟡 Binance Web3 Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('coinbase')">🔵 Coinbase Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('okx')">⭕ OKX Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('bitget')">🪙 Bitget Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('tokenpocket')">🌀 TokenPocket</button>
+                <button class="wallet-btn" onclick="openWalletApp('safepal')">🔒 SafePal</button>
+                <button class="wallet-btn" onclick="openWalletApp('bybit')">📊 Bybit Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('phantom')">🟣 Phantom Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('crypto')">💠 Crypto.com DeFi Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('kucoin')">🟨 KuCoin Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('gate')">🚪 Gate.io Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('imtoken')">🟥 imToken</button>
+                <button class="wallet-btn" onclick="openWalletApp('unstoppable')">🌐 Unstoppable Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('bitpay')">💳 BitPay</button>
+                <button class="wallet-btn" onclick="openWalletApp('argent')">🛡️ Argent</button>
+                <button class="wallet-btn" onclick="openWalletApp('alphawallet')">⚡ AlphaWallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('xdefi')">✖️ XDEFI Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('solflare')">☀️ Solflare</button>
+            </div>
         </div>
 
         <br>
@@ -272,14 +313,79 @@
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         }
 
-        function openMetaMaskApp() {
-            const currentUrl = window.location.href.replace(/^https?:\/\//, '');
-            window.location.href = `https://metamask.app.link/dapp/${currentUrl}`;
-        }
-
-        function openTrustWalletApp() {
+        function openWalletApp(walletType) {
             const currentUrl = window.location.href;
-            window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(currentUrl)}`;
+            const cleanUrl = currentUrl.replace(/^https?:\/\//, '');
+
+            let deepLink = '';
+
+            switch (walletType) {
+                case 'metamask':
+                    deepLink = `https://metamask.app.link/dapp/${cleanUrl}`;
+                    break;
+                case 'trust':
+                    deepLink = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'binance':
+                    deepLink = `https://app.binance.com/en/deeplink/cryptorouting/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'coinbase':
+                    deepLink = `https://go.cb-w.com/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'okx':
+                    deepLink = `https://www.okx.com/download?url=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'bitget':
+                    deepLink = `https://bk.app/en/deeplink/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'tokenpocket':
+                    deepLink = `tpdapp://open?params=${encodeURIComponent(JSON.stringify({url: currentUrl}))}`;
+                    break;
+                case 'safepal':
+                    deepLink = `https://safepal.io/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'bybit':
+                    deepLink = `https://www.bybit.com/en/deeplink/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'phantoms':
+                case 'phantom':
+                    deepLink = `https://phantom.app/ul/browse/${encodeURIComponent(currentUrl)}?ref=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'crypto':
+                    deepLink = `https://deeplink.crypto.com/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'kucoin':
+                    deepLink = `https://kucoin.com/land/ucard/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'gate':
+                    deepLink = `https://www.gate.io/mobile/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'imtoken':
+                    deepLink = `imtoken://support.token.im/start?url=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'unstoppable':
+                    deepLink = `unstoppable.money://url?url=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'bitpay':
+                    deepLink = `https://bitpay.com/wallet?url=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'argent':
+                    deepLink = `https://argent.link/app/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'alphawallet':
+                    deepLink = `https://aw.app/open?url=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'xdefi':
+                    deepLink = `https://www.xdefi.io/dapp?url=${encodeURIComponent(currentUrl)}`;
+                    break;
+                case 'solflare':
+                    deepLink = `https://solflare.com/ul/v1/browse/${encodeURIComponent(currentUrl)}`;
+                    break;
+                default:
+                    deepLink = currentUrl;
+            }
+
+            window.location.href = deepLink;
         }
 
         async function connectWallet() {
@@ -292,10 +398,10 @@
                 } else {
                     if (isMobile()) {
                         walletOptions.classList.toggle('show');
-                        showStatus('📱 Select your wallet app below to open this page automatically.', 'info');
+                        showStatus('📱 Select your wallet from the list below.', 'info');
                         return;
                     } else {
-                        showStatus('⚠️ Web3 Provider not found. Please install MetaMask browser extension.', 'error');
+                        showStatus('⚠️ Web3 Provider not found. Please install MetaMask or a compatible browser extension.', 'error');
                         return;
                     }
                 }
